@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 
-const connection = mongoose.createConnection('mongodb://127.0.0.1:27017').on('open', () => {
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ccgm_bds';
+
+mongoose.set('strictQuery', true);
+
+mongoose.connect(MONGO_URI, {
+    autoIndex: true
+}).then(() => {
     // eslint-disable-next-line no-console
     console.log('Connected to MongoDB');
-}).on('error', (error) => {
+}).catch((error) => {
     // eslint-disable-next-line no-console
     console.error('MongoDB connection error:', error);
 });
 
-module.exports = connection;
+module.exports = mongoose;
 
