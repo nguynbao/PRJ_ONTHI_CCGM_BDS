@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const { AuthUser } = require('../Model');
+const jwt = require('jsonwebtoken');
 
 async function register(email, password) {
     const existing = await AuthUser.findOne({ email });
@@ -20,4 +21,9 @@ async function login(email, password) {
     return { id: user._id, email: user.email };
 }
 
-module.exports = { register, login };
+function verifyToken(token) {
+    const secret = process.env.JWT_SECRET || 'dev-secret-change-me';
+    return jwt.verify(token, secret);
+}
+
+module.exports = { register, login, verifyToken };
