@@ -30,7 +30,7 @@ class ClientApp extends StatelessWidget {
     return MaterialApp(
       theme: AppTheme.appTheme,
       debugShowCheckedModeBanner: false,
-      home: CreatePinPage(),
+      home: TermsConditionPage(),
     );
   }
 }

@@ -10,11 +10,12 @@ class TermsConditionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Row(
           children: [
             IconButton(
               onPressed: () {
-                AppNavigator.pop(context);
+                // AppNavigator.pop(context);
               },
               icon: Icon(
                 Iconsax.arrow_left,
