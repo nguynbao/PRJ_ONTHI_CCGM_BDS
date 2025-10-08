@@ -19,11 +19,15 @@ class AppButton extends StatelessWidget {
       child: Row(
         // mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            content,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+           const SizedBox(width: 40), 
+          Expanded(
+            child: Text(
+              content,
+              textAlign: TextAlign.center, // chữ ở giữa
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
           ),
           const SizedBox(width: 15),
           Container(

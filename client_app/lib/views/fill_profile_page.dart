@@ -51,7 +51,7 @@ class FillProfilePage extends StatelessWidget {
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 50),
-            child: AppButton(content: 'Sign In', onPressed: () {}),
+            child: AppButton(content: 'Continue', onPressed: () {}),
           ),
         ],
       ),
