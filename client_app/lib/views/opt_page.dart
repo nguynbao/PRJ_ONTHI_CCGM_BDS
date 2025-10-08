@@ -75,7 +75,7 @@ class OptPage extends StatelessWidget {
           style: TextStyle(
             color: AppColor.textpriCol,
             fontWeight: FontWeight.w500,
-            fontSize: 10,
+            fontSize: 13,
           ),
         ),
         const SizedBox(width: 5),
@@ -92,7 +92,7 @@ class OptPage extends StatelessWidget {
             style: TextStyle(
               color: AppColor.buttonprimaryCol,
               fontWeight: FontWeight.w700,
-              fontSize: 10,
+              fontSize: 13,
             ),
           ),
         ),
