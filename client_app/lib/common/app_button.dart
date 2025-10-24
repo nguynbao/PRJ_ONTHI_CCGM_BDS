@@ -1,5 +1,6 @@
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax/iconsax.dart';
 
 class AppButton extends StatelessWidget {
@@ -8,34 +9,37 @@ class AppButton extends StatelessWidget {
   final VoidCallback onPressed;
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 5),
-        foregroundColor: Colors.white,
-        backgroundColor: AppColor.buttonprimaryCol,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50))
-      ),
-      onPressed: onPressed,
-      child: Row(
-        // mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            content,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-          ),
-          const SizedBox(width: 15),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle
+    return SizedBox(
+      width: 200.h,
+      child: ElevatedButton(    
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 5),
+          foregroundColor: Colors.white,
+          backgroundColor: AppColor.buttonprimaryCol,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50))
+        ),
+        onPressed: onPressed,
+        child: Row(
+          // mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              content,
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
-            child: Center(child: Icon(Iconsax.arrow_right_14, size: 20, color: AppColor.buttonprimaryCol, fontWeight: FontWeight.w600,))
-          )
-        ],
+            const SizedBox(width: 15),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle
+              ),
+              child: Center(child: Icon(Iconsax.arrow_right_14, size: 20, color: AppColor.buttonprimaryCol, fontWeight: FontWeight.w600,))
+            )
+          ],
+        ),
       ),
     );
   }

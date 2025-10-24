@@ -37,6 +37,8 @@ dependencies:
   iconsax: ^0.0.8
   smooth_page_indicator: ^1.2.1
   apptomate_custom_checkbox: ^0.0.2
+  flutter_svg: ^2.2.1
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:
