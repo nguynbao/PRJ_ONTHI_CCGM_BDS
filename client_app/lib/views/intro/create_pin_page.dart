@@ -45,11 +45,12 @@ class CreatePinPage extends StatelessWidget {
               _titlePage(), 
               const SizedBox(height: 86,),
               _txtFiePinCode(context),
-              const SizedBox(height: 86,),
+              Spacer(),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: AppButton(content: 'Continue', onPressed: () {}),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
