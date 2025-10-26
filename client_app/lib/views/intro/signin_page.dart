@@ -1,7 +1,10 @@
 import 'package:apptomate_custom_checkbox/apptomate_custom_checkbox.dart';
 import 'package:client_app/common/app_button.dart';
-import 'package:client_app/config/assets/app_icon.dart';
+import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
+import 'package:client_app/data/local/token_storage.dart';
+import 'package:client_app/data/remote/auth_service.dart';
+import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -13,47 +16,195 @@ class SigninPage extends StatefulWidget {
 }
 
 class _SigninPageState extends State<SigninPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _pwdController = TextEditingController();
+  // ---- FORM & CONTROLLERS
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _pwdController = TextEditingController();
 
+  // ---- UI STATE
+  bool _obscure = true;
+  bool _loading = false;
+  bool _rememberMe = false;
+
+  final _auth = AuthService();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _pwdController.dispose();
+    super.dispose();
+  }
+
+  // ---- VALIDATORS
+  String? _validateEmail(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Email is required';
+    final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v.trim());
+    return ok ? null : 'Email is invalid';
+  }
+
+  String? _validatePwd(String? v) {
+    if (v == null || v.isEmpty) return 'Password is required';
+    if (v.length < 6) return 'At least 6 characters';
+    return null;
+  }
+
+  // ---- LOGIN HANDLER
+  Future<void> _onLogin() async {
+    final ok = _formKey.currentState?.validate() ?? false;
+    if (!ok) return;
+
+    setState(() => _loading = true);
+    try {
+      final data = await _auth.login(
+        email: _emailController.text.trim(),
+        password: _pwdController.text,
+      );
+
+      final token = data['token'] as String?;
+      if (token == null) throw Exception('Missing token');
+
+      await TokenStorage.save(token);
+
+      // (Tuỳ chọn) Remember me: lưu email vào SharedPreferences nếu muốn
+      // nếu bạn có lớp Storage riêng thì dùng ở đây.
+
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Login failed: $e')));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  // ====== UI ======
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //Title
-              _titlePage(),
-              const SizedBox(height: 45),
-              // TextField For Signing
-              _textFieldEmail(context),
-              const SizedBox(height: 15),
-              _textFieldPwd(context),
-              const SizedBox(height: 20),
-              _checkBoxConfirm(),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50),
-                child: AppButton(content: 'Sign In', onPressed: () {}),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _titlePage(),
+                  const SizedBox(height: 32),
+
+                  // Email
+                  _inputWrapper(
+                    child: TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      cursorColor: AppColor.textpriCol,
+                      decoration: _decoration(
+                        hint: 'Email',
+                        prefix: const Icon(Iconsax.sms, color: AppColor.textpriCol),
+                      ),
+                      validator: _validateEmail,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Password
+                  _inputWrapper(
+                    child: TextFormField(
+                      controller: _pwdController,
+                      cursorColor: AppColor.textpriCol,
+                      obscureText: _obscure,
+                      decoration: _decoration(
+                        hint: 'Password',
+                        prefix: const Icon(Iconsax.lock, color: AppColor.textpriCol),
+                        suffix: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure ? Iconsax.eye_slash : Iconsax.eye,
+                            color: AppColor.textpriCol,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      validator: _validatePwd,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Remember me + Forgot password
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            CustomCheckbox(
+                              padding: EdgeInsets.zero,
+                              activeColor: const Color(0xff50B748),
+                              value: _rememberMe,
+                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Remember Me',
+                              style: TextStyle(
+                                color: AppColor.textpriCol,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // TODO: Forgot password flow
+                          },
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: AppColor.textpriCol,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Nút Sign In (gọi _onLogin + loading)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: AppButton(
+                      content: _loading ? 'Please wait...' : 'Sign In',
+                      onPressed: (){_onLogin();},
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  _optSignUp(),
+                  const SizedBox(height: 14),
+                  _methodSignUp(),
+                  const SizedBox(height: 16),
+                  _moveOnSignUp(),
+                ],
               ),
-              const SizedBox(height: 20),
-              _optSignUp(),
-              const SizedBox(height: 20),
-              _methodSignUp(),
-              const SizedBox(height: 20),
-              _moveOnSignIn(),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _moveOnSignIn() {
+  // ---- Widgets phụ trợ UI ----
+  Widget _moveOnSignUp() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -69,11 +220,10 @@ class _SigninPageState extends State<SigninPage> {
         TextButton(
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
-            minimumSize: Size(0, 0),
-            tapTargetSize:
-                MaterialTapTargetSize.shrinkWrap, // 🔹 giảm vùng nhấn
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          onPressed: () {},
+          onPressed: () => Navigator.of(context).pushNamed('/signup'),
           child: const Text(
             'SIGN UP',
             style: TextStyle(
@@ -89,11 +239,11 @@ class _SigninPageState extends State<SigninPage> {
 
   Widget _methodSignUp() {
     return Row(
-      spacing: 25,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _iconMethod(AppIcon.googleIcon, () => {}),
-        _iconMethod(AppIcon.apppleIcon, () => {}),
+        _iconMethod(AppIcons.googleIcon, () {}),
+        const SizedBox(width: 25),
+        _iconMethod(AppIcons.apppleIcon, () {}),
       ],
     );
   }
@@ -101,32 +251,31 @@ class _SigninPageState extends State<SigninPage> {
   Widget _iconMethod(String icons, VoidCallback onPressed) {
     return TextButton(
       onPressed: onPressed,
+      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
       child: Container(
         width: 50,
         height: 50,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black45,
-              offset: Offset(0, 1),
+              color: Colors.black.withOpacity(.25),
+              offset: const Offset(0, 1),
               blurRadius: 10,
               spreadRadius: -5,
             ),
           ],
         ),
         alignment: Alignment.center,
-        child: Center(
-          child: Image.asset(icons, width: 20, height: 20, fit: BoxFit.contain),
-        ),
+        child: Image.asset(icons, width: 20, height: 20, fit: BoxFit.contain),
       ),
     );
   }
 
   Widget _optSignUp() {
-    return Center(
-      child: const Text(
+    return const Center(
+      child: Text(
         'Or Continue With',
         style: TextStyle(
           color: AppColor.textpriCol,
@@ -137,164 +286,62 @@ class _SigninPageState extends State<SigninPage> {
     );
   }
 
-  Widget _checkBoxConfirm() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              CustomCheckbox(
-                padding: EdgeInsets.zero,
-                activeColor: Color(0xff50B748),
-                value: false,
-                onChanged: (value) {},
-              ),
-              Text(
-                'Remember Me',
-                style: TextStyle(
-                  color: AppColor.textpriCol,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'Forgot Password?',
-              style: TextStyle(
-                color: AppColor.textpriCol,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
-            ),
+  InputDecoration _decoration({required String hint, Widget? prefix, Widget? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: AppColor.textpriCol),
+      prefixIcon: prefix,
+      suffixIcon: suffix,
+      border: _border(Colors.transparent),
+      enabledBorder: _border(Colors.transparent),
+      focusedBorder: _border(AppColor.buttonprimaryCol),
+      contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+    );
+  }
+
+  Widget _inputWrapper({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xffFFFFFF),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.25),
+            offset: const Offset(0, 1),
+            blurRadius: 10,
+            spreadRadius: -5,
           ),
         ],
       ),
+      child: child,
     );
   }
 
-  Widget _textFieldPwd(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xffFFFFFF),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              offset: Offset(0, 1),
-              blurRadius: 10,
-              spreadRadius: -5,
-            ),
-          ],
-        ),
-        child: TextField(
-          controller: _pwdController,
-          cursorColor: AppColor.textpriCol,
-          obscureText: true,
-          decoration: InputDecoration(
-
-            hint: Text(
-              'Password',
-              style: TextStyle(color: AppColor.textpriCol),
-            ),
-            prefixIcon: Icon(Iconsax.lock, color: AppColor.textpriCol),
-            suffixIcon: IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Iconsax.eye_slash,
-                color: AppColor.textpriCol,
-                size: 20,
-              ),
-            ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.buttonprimaryCol),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _textFieldEmail(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xffFFFFFF),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              offset: Offset(0, 1),
-              blurRadius: 10,
-              spreadRadius: -5,
-            ),
-          ],
-        ),
-        child: TextField(
-          controller: _emailController,
-          cursorColor: AppColor.textpriCol,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Iconsax.sms, color: AppColor.textpriCol),
-            hint: Text('Email', style: TextStyle(color: AppColor.textpriCol)),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.buttonprimaryCol),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  OutlineInputBorder _border(Color c) =>
+      OutlineInputBorder(borderSide: BorderSide(color: c), borderRadius: BorderRadius.circular(10));
 
   Widget _titlePage() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Let’s Sign In.!',
-            style: TextStyle(
-              color: AppColor.textpriCol,
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
-            ),
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Let’s Sign In.!',
+          style: TextStyle(
+            color: AppColor.textpriCol,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
           ),
-          SizedBox(height: 10),
-          Text(
-            'Login to Your Account to Continue your Courses',
-            style: TextStyle(
-              color: AppColor.textpriCol,
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Login to Your Account to Continue your Courses',
+          style: TextStyle(
+            color: AppColor.textpriCol,
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

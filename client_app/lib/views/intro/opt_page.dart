@@ -1,5 +1,5 @@
 import 'package:client_app/common/app_button.dart';
-import 'package:client_app/config/assets/app_icon.dart';
+import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:flutter/material.dart';
 
@@ -28,14 +28,14 @@ class OptPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _buildOpt(
-                icons: AppIcon.googleIcon,
+                icons: AppIcons.googleIcon,
                 method: "Google",
                 context: context,
                 onPressed: () {},
               ),
               const SizedBox(height: 10),
               _buildOpt(
-                icons: AppIcon.apppleIcon,
+                icons: AppIcons.apppleIcon,
                 method: "Apple",
                 context: context,
                 onPressed: () {},

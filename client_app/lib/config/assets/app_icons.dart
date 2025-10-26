@@ -1,6 +1,5 @@
-class AppIcon {
+class AppIcons {
   static const String format = '.png';
-  static const String svg = '.svg';
   static const String base = 'assets/icons/';
   static const String googleIcon = '${base}gg_logo$format';
   static const String apppleIcon = '${base}apple_logo$format';

@@ -39,6 +39,8 @@ dependencies:
   apptomate_custom_checkbox: ^0.0.2
   flutter_svg: ^2.2.1
   flutter_screenutil: ^5.9.3
+  dio: ^5.9.0
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,7 @@ flutter:
     - assets/fonts/
     - assets/icons/
     - assets/images/
+    - assets/vector/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

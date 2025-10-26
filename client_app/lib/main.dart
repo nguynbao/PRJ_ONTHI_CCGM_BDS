@@ -1,5 +1,6 @@
 import 'package:client_app/config/themes/app_theme.dart';
-import 'package:client_app/views/home/main_screen.dart';
+import 'package:client_app/views/intro/signup_page.dart';
+import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:client_app/views/intro/create_new_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +30,7 @@ class ClientApp extends StatelessWidget {
           home: child,
         );
       },
-      child: const MainScreen(),
+      child: const SignupPage(),
     );
   }
 }

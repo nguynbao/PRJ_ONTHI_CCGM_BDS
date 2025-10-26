@@ -1,6 +1,5 @@
 // lib/shared/widgets/show_modal.dart
-import 'package:client_app/config/assets/app_icon.dart';
-import 'package:client_app/config/assets/app_images.dart';
+import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -41,7 +40,7 @@ Future<void> showSuccessDialog(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: SvgPicture.asset(AppIcon.imgPassSetting),
+                  child: SvgPicture.asset(AppIcons.imgPassSetting),
                 ),
                 const SizedBox(height: 12),
                 Text(
