@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const topicController = require('../Controllers/topic.controller');
+const topicController = require('../controllers/topic.controller');
 
 // tạo topic mới
 router.post('/', topicController.createTopic);

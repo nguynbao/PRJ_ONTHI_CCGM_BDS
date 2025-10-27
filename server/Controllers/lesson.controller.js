@@ -1,5 +1,5 @@
 const httpStatus = { OK: 200, CREATED: 201, BAD: 400, UNAUTHORIZED: 401, SERVER: 500 };
-const lessonService = require('../Services/lesson.service');
+const lessonService = require('../services/lesson.service');
 
 
 exports.createLesson = async (req, res) => {

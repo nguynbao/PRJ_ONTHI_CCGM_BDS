@@ -1,5 +1,5 @@
 const httpStatus = { OK: 200, CREATED: 201, BAD: 400, UNAUTHORIZED: 401, SERVER: 500 };
-const topicService = require('../Services/topic.service');
+const topicService = require('../services/topic.service');
 
 exports.createTopic = async (req, res) => {
     try {

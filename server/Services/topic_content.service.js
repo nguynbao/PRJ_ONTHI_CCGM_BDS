@@ -1,4 +1,4 @@
-const { Topic, TopicContent } = require('../Model');
+const { Topic, TopicContent } = require('../models');
 
 async function createTopicContent({ topicId, contentMd }) {
     if (!topicId) throw new Error('TOPIC_REQUIRED');

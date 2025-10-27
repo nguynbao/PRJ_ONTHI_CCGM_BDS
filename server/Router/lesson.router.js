@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const lessonController = require('../Controllers/lesson.controller');
-const { verifyToken } = require('../Services/auth.service');
+const lessonController = require('../controllers/lesson.controller');
+const { verifyToken } = require('../services/auth.service');
 
 // auth middleware for lesson routes
 router.use((req, res, next) => {

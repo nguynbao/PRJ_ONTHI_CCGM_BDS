@@ -1,5 +1,5 @@
-const httpStatus = { OK: 200, CREATED: 201, BAD: 400, UNAUTHORIZED: 401, SERVER: 500 };
-const authService = require('../Services/auth.service');
+const httpStatus = { OK: 200, CREATED: 201, BAD: 400, UNAUTHORIZED: 401, server: 500 };
+const authService = require('../services/auth.service');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
         if (err.message === 'EMAIL_EXISTS') {
             return res.status(httpStatus.BAD).json({ error: 'Email already in use' });
         }
-        return res.status(httpStatus.SERVER).json({ error: 'Internal error' });
+        return res.status(httpStatus.server).json({ error: 'Internal error' });
     }
 };
 
@@ -23,7 +23,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign(payload, secret, { expiresIn: '7d' });
         return res.status(httpStatus.OK).json({ token, user: payload });
     } catch (err) {
-        const code = err.message === 'INVALID_CREDENTIALS' ? httpStatus.UNAUTHORIZED : httpStatus.SERVER;
+        const code = err.message === 'INVALID_CREDENTIALS' ? httpStatus.UNAUTHORIZED : httpStatus.server;
         return res.status(code).json({ error: 'Login failed' });
     }
 };

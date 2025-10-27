@@ -1,4 +1,4 @@
-const { Topic, Lesson } = require('../Model');
+const { Topic, Lesson } = require('../models');
 
 async function createTopic({ lessonId, title }) {
     if (!lessonId) throw new Error('LESSON_REQUIRED');

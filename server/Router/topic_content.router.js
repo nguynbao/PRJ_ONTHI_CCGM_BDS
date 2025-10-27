@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const topicContentController = require('../Controllers/topic_content.controller');
+const topicContentController = require('../controllers/topic_content.controller');
 
 // tạo nội dung cho topic
 router.post('/', topicContentController.createTopicContent);

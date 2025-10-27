@@ -1,4 +1,4 @@
-const { Lesson } = require('../Model');
+const { Lesson } = require('../models');
 
 async function createLesson(userId, title) {
     const lesson = await Lesson.create({ user: userId, title });
