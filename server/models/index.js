@@ -1,27 +1,24 @@
 module.exports = {
-    // Auth & User
-    AuthUser: require('./AuthUser'),
-    UserProfile: require('./UserProfile'),
-    UserSettings: require('./UserSettings'),
-    OtpLog: require('./OtpLog'),
-
-    // Catalog
-    Topic: require('./Topic'),
-    TopicContent: require('./TopicContent'),
-    Tag: require('./Tag'),
-
-    // Question Bank
-    Question: require('./Question'),
-    QuestionContent: require('./QuestionContent'),
-    AnswerOption: require('./AnswerOption'),
-    AnswerOptionContent: require('./AnswerOptionContent'),
-
-    // Exam & Test
-    ExamTemplate: require('./ExamTemplate'),
-    TestSession: require('./TestSession'),
-    TestQuestion: require('./TestQuestion'),
-
-    // Others
-    Notification: require('./Notification'),
-    Lesson: require('./Lesson'),
+  User: require('./user.model'),
+  AuthUser: require('./authuser.model'),
+  Organization: require('./organization.model'),
+  Topic: require('./topic.model'),
+  GlossaryTerm: require('./glossaryTerm.model'),
+  FAQ: require('./faq.model'),
+  Announcement: require('./announcement.model'),
+  Question: require('./question.model'),
+  Exam: require('./exam.model'),
+  OfficialExamSchedule: require('./officialExamSchedule.model'),
+  TestSession: require('./testSession.model'),
+  UserTopicStats: require('./userTopicStats.model'),
+  UserStudyTimeline: require('./userStudyTimeline.model'),
+  StudyPlanTemplate: require('./studyPlanTemplate.model'),
+  UserStudyPlan: require('./userStudyPlan.model'),
+  Recommendation: require('./recommendation.model'),
+  FlashcardDeck: require('./flashcardDeck.model'),
+  Flashcard: require('./flashcard.model'),
+  FlashcardProgress: require('./flashcardProgress.model'),
+  Bookmark: require('./bookmark.model'),
+  Notification: require('./notification.model'),
+  UserNotification: require('./userNotification.model'),
 };

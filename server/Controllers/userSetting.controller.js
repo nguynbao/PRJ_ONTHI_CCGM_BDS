@@ -5,19 +5,20 @@ const httpStatus = {
   UNAUTHORIZED: 401,
   server: 500,
 };
-
+const createError = require("http-errors");
 const { upsertSchema } = require("../validators/userSettings.validator");
-const svc = require("../services/userSettings.service");
+const svc = require("../services/user_setting.service");
 
-async function getMe({ req, res }) {
+async function getMe(req, res) {
   const userId = req.user.id;
   const found = await svc.getByUserId(userId);
   return res.json(
     found || {
       user: userId,
-      userName: null,
-      BOD: null,
-      gender: null,
+      userName: "",
+      BOD: '00/00/00',
+      gender: "nam",
+      phone: null,
       notifyPush: true,
       notifyEmail: true,
       darkMode: false,
@@ -38,4 +39,4 @@ async function removeMe(req, res) {
   await svc.removeByUserId(userId);
   return res.status(204).send();
 }
-module.exports = { getMe, upsertMe, removeMe, getByUserIdAdmin };
+module.exports = { getMe, upsertMe, removeMe };

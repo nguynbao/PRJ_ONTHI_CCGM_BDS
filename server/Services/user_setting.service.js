@@ -1,18 +1,27 @@
 const { UserSettings } = require("../models");
 
 async function getByUserId(userId) {
-  return UserSettings.findOne({ user: UserId }).lean();
+  return UserSettings.findOne({ user: userId }).lean();
 }
 async function createByUserId(userId, payload = {}) {
   // tránh tạo trùng do unique
   const existed = await UserSettings.findOne({ user: userId }).lean();
   if (existed) {
-    const err = new Error('ALREADY_EXISTS');
+    const err = new Error("ALREADY_EXISTS");
     err.status = 409;
     throw err;
   }
 
-  const allowed = ['userName','BOD','gender','notifyPush','notifyEmail','darkMode','language'];
+  const allowed = [
+    "userName",
+    "BOD",
+    "gender",
+    "notifyPush",
+    "phone",
+    "notifyEmail",
+    "darkMode",
+    "language",
+  ];
   const data = { user: userId };
   for (const k of allowed) if (payload[k] !== undefined) data[k] = payload[k];
 
@@ -26,6 +35,7 @@ async function upsertByUserId(userId, payload) {
     "BOD",
     "gender",
     "notifyPush",
+    "phone",
     "notifyEmail",
     "darkMode",
     "language",

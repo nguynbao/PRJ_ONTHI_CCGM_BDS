@@ -5,6 +5,7 @@ const upsertSchema = Joi.object({
   userName: Joi.string().max(120).allow('', null),
   BOD: Joi.date().iso().allow(null),
   gender: Joi.string().valid('male', 'female').allow(null),
+  phone: Joi.string().max(10).allow('', null),
   notifyPush: Joi.boolean(),
   notifyEmail: Joi.boolean(),
   darkMode: Joi.boolean(),
