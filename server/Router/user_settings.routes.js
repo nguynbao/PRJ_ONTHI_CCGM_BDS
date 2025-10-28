@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const userSettingCtl = require("../Controllers/userSetting.controller");
+const userSettingCtl = require("../controllers/userSetting.controller");
 const { verifyToken } = require("../services/auth.service");
 router.use((req, res, next) => {
   const header = req.headers && req.headers.authorization;
