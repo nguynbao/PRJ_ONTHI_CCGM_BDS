@@ -20,12 +20,15 @@ const ProfileSchema = new Schema({
 }, { _id: false });
 
 const UserSchema = new Schema({
-  email: { type: String, unique: true, sparse: true, trim: true, lowercase: true },
-  phone: { type: String, unique: true, sparse: true, trim: true },
-  status: { type: String, enum: ['active','blocked','pending'], default: 'active' },
+  email: { type: String, trim: true, lowercase: true },
+  phone: { type: String, trim: true},
+  status: { type: String, enum: ['active','blocked','pending','incomplete'], default: 'incomplete' },
   profile: { type: ProfileSchema, default: () => ({}) },
   orgMemberships: { type: [OrgMembershipSchema], default: [] },
 }, { timestamps: true });
 
+// Cho phép nhiều null/thiếu phone, nhưng unique khi có giá trị
+// UserSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $exists: true, $ne: null, $ne: "" } } });
 UserSchema.index({ 'profile.preferences.language': 1 });
+
 module.exports = model('User', UserSchema);

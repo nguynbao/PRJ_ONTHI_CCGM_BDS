@@ -1,5 +1,6 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
+import 'package:client_app/widget/modal/show_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -149,7 +150,12 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                         Spacer(),
                         IconButton(
                           onPressed: () {
-                            
+                            showRemoveBottomSheet(
+                              context,
+                              // title: 'Lưu thành công',
+                              message: "thành công"
+
+                            );
                           },
                           icon: SvgPicture.asset(AppVector.iconTag),
                         ),
