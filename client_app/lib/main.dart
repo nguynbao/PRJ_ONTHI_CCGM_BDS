@@ -8,6 +8,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  ));
   runApp(ClientApp());
 }
 
@@ -21,16 +26,13 @@ class ClientApp extends StatelessWidget {
       minTextAdapt: true, // scale text mềm mại
       splitScreenMode: true, // hỗ trợ đa cửa sổ/tablet
       builder: (context, child) {
-        SystemChrome.setSystemUIOverlayStyle(
-          const SystemUiOverlayStyle(statusBarBrightness: Brightness.light),
-        );
         return MaterialApp(
           theme: AppTheme.appTheme,
           debugShowCheckedModeBanner: false,
           home: child,
         );
       },
-      child: const SignupPage(),
+      child: const MainScreen(),
     );
   }
 }
