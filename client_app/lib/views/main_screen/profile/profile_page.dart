@@ -1,3 +1,4 @@
+import 'package:client_app/views/main_screen/profile/edit_profile/edit_profile.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -170,7 +171,15 @@ class ProfilePage extends StatelessWidget {
                   // Danh sách chức năng
                   Column(
                     children: [
-                      _buildProfileTile(Icons.person_outline, 'Chỉnh sửa Profile'),
+                      _buildProfileTile(
+                        Icons.person_outline, 'Chỉnh sửa tài khoản',
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const EditProfilePage())
+                          );
+                        }
+                      ),
                       _buildProfileTile(Icons.settings_outlined, 'Cài đặt'),
                       _buildProfileTile(Icons.notifications_none, 'Thông báo'),
                       _buildProfileTile(Icons.security_outlined, 'Bảo mật'),
