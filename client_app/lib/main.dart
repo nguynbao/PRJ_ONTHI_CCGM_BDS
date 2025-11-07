@@ -30,7 +30,7 @@ class ClientApp extends StatelessWidget {
           home: child,
         );
       },
-      child: const SignupPage(),
+      child: const MainScreen(),
     );
   }
 }
