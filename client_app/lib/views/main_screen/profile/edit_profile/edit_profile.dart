@@ -37,7 +37,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return PlatformScaffold(
-      backgroundColor: AppColor.inputBackgroundColor,
+      backgroundColor: const Color(0xFFF1F5F9), // Nền xám nhạt hơn để tạo độ sâu
       appBar: PlatformAppBar(
         title: const Text(
           'Chỉnh sửa Profile',
@@ -310,7 +310,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, // Giữ trắng cho input để nổi bật trên nền xám nhạt
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -330,17 +330,57 @@ class _EditProfilePageState extends State<EditProfilePage> {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: AppColor.primaryBlue.withOpacity(0.6))
+              ? Padding(
+            padding: EdgeInsets.only(
+              left: 20.w,
+              right: 16.w,
+              top: 20.h,
+              bottom: 20.h,
+            ),
+            child: Icon(
+              prefixIcon,
+              color: AppColor.primaryBlue.withOpacity(0.6),
+              size: 20,
+            ),
+          )
               : null,
           suffixIcon: suffixIcon != null
-              ? Icon(suffixIcon, color: AppColor.primaryBlue.withOpacity(0.6))
+              ? Padding(
+            padding: EdgeInsets.only(
+              left: 16.w,
+              right: 20.w,
+              top: 20.h,
+              bottom: 20.h,
+            ),
+            child: Icon(
+              suffixIcon,
+              color: AppColor.primaryBlue.withOpacity(0.6),
+              size: 20,
+            ),
+          )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16.r),
             borderSide: BorderSide.none,
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide(
+              color: AppColor.primaryBlue.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
           filled: true,
           fillColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 0,
+            vertical: 20.h,
+          ),
+          isDense: true,
         ),
       ),
     );
@@ -405,7 +445,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet([
+      isScrollControlled: true,
+      builder: (context) => _buildBottomSheetContainer([
         {'label': 'Nam', 'icon': Icons.male},
         {'label': 'Nữ', 'icon': Icons.female},
         {'label': 'Khác', 'icon': Icons.transgender},
@@ -417,43 +458,93 @@ class _EditProfilePageState extends State<EditProfilePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet([
+      isScrollControlled: true,
+      builder: (context) => _buildBottomSheetContainer([
         {'label': 'Developer', 'icon': Icons.code},
         {'label': 'Designer', 'icon': Icons.design_services},
+        {'label': 'Manager', 'icon': Icons.business},
+        {'label': 'Student', 'icon': Icons.school},
+        {'label': 'Other', 'icon': Icons.more_horiz},
       ], (label) => _occupationController.text = label),
     );
   }
 
-  Widget _buildBottomSheet(
+  Widget _buildBottomSheetContainer(
       List<Map<String, dynamic>> items, Function(String) onSelect) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: ListView(
-        shrinkWrap: true,
-        children: items
-            .map(
-              (item) => ListTile(
-            leading: Icon(item['icon'], color: AppColor.primaryBlue),
-            title: Text(item['label']),
-            onTap: () {
-              setState(() => onSelect(item['label']));
-              Navigator.pop(context);
-            },
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
           ),
-        )
-            .toList(),
+        ],
       ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 8.h),
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            ...items.map((item) => _buildBottomSheetTile(
+              item['label'],
+              item['icon'],
+                  () {
+                setState(() => onSelect(item['label']));
+                Navigator.pop(context);
+              },
+            )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomSheetTile(String label, IconData icon, VoidCallback onTap) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 4.h),
+      leading: Icon(icon, color: AppColor.primaryBlue, size: 24),
+      title: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF1E293B),
+        ),
+      ),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Colors.grey.shade400,
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        side: BorderSide(color: Colors.grey.shade100),
+      ),
+      tileColor: Colors.transparent,
     );
   }
 
   void _updateProfile() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Cập nhật thành công!'),
+      SnackBar(
+        content: const Text('Cập nhật thành công!'),
         backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.r),
+        ),
       ),
     );
     Navigator.pop(context);

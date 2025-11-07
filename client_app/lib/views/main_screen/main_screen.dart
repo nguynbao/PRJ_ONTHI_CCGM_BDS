@@ -3,11 +3,12 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
 import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
-import 'package:client_app/views/main_screen/notication/notication_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_svg/svg.dart';
+
+import 'notification/notification_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
