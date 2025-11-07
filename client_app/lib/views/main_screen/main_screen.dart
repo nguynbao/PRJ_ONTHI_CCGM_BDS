@@ -1,4 +1,3 @@
-// lib/presentation/view/main_screen.dart
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
@@ -7,12 +6,8 @@ import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/notication/notication_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_svg/svg.dart';
-
-// TODO: thay bằng import thật trong dự án của bạn
-// Ví dụ thêm một tab hồ sơ
-// Tạo file profile_page.dart riêng nếu bạn chưa có
-// Hoặc tạm dùng Placeholder() ngay trong _pages.
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -68,44 +63,65 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _dismissKeyboard,
-      child: WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          body: PageStorage(
-            bucket: _bucket,
-            child: IndexedStack(index: _currentIndex, children: _pages),
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            currentIndex: _currentIndex,
-            selectedItemColor: AppColor.buttomSecondCol,
-            unselectedItemColor: Colors.black,
-            selectedLabelStyle: TextStyle(fontWeight: FontWeight.w500),
-
-            type: BottomNavigationBarType.fixed,
-            items: List.generate(_tabs.length, (i) {
-              final t = _tabs[i];
-              return BottomNavigationBarItem(
-                icon: SvgPicture.asset(t.svgPath, width: 22, height: 22),
-                activeIcon: SvgPicture.asset(
-                  t.svgPath,
-                  width: 22,
-                  height: 22,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.buttomSecondCol,
-                    BlendMode.srcIn,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark, // Android: icon đen
+        statusBarBrightness: Brightness.light,     // iOS: icon đen
+      ),
+      child: GestureDetector(
+        onTap: _dismissKeyboard,
+        child: WillPopScope(
+          onWillPop: _onWillPop,
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: PageStorage(
+              bucket: _bucket,
+              child: IndexedStack(index: _currentIndex, children: _pages),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Colors.white,
+              elevation: 8,
+              currentIndex: _currentIndex,
+              selectedItemColor: const Color(0xFF2196F3),
+              unselectedItemColor: Colors.grey,
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+              type: BottomNavigationBarType.fixed,
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              selectedFontSize: 11,
+              unselectedFontSize: 11,
+              items: List.generate(_tabs.length, (i) {
+                final t = _tabs[i];
+                return BottomNavigationBarItem(
+                  icon: SvgPicture.asset(
+                    t.svgPath,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.grey,
+                      BlendMode.srcIn,
+                    ),
                   ),
-                ),
-                label: t.title,
-              );
-            }),
-            onTap: (i) {
-              if (i == _currentIndex) return;
-              _dismissKeyboard();
-              setState(() => _currentIndex = i);
-            },
+                  activeIcon: SvgPicture.asset(
+                    t.svgPath,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xFF2196F3),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: t.title,
+                );
+              }),
+              onTap: (i) {
+                if (i == _currentIndex) return;
+                _dismissKeyboard();
+                setState(() => _currentIndex = i);
+              },
+            ),
           ),
         ),
       ),
