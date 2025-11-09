@@ -1,5 +1,7 @@
 import 'package:client_app/views/intro/create_new_password_page.dart';
 import 'package:client_app/views/main_screen/profile/edit_profile/edit_profile.dart';
+import 'package:client_app/views/main_screen/profile/language/language.dart';
+import 'package:client_app/views/main_screen/profile/notification/notification_setting.dart';
 import 'package:client_app/views/main_screen/profile/setting/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -199,11 +201,20 @@ class ProfilePage extends StatelessWidget {
                         onTap: (){
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SettingPage(),)
+                              MaterialPageRoute(builder: (context) => const GeneralSettingsPage(),)
                             );
                         }
                       ),
-                      _buildProfileTile(Icons.notifications_none, 'Thông báo'),
+                      _buildProfileTile(
+                        Icons.notifications_none,
+                        'Thông báo',
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const NotificationSettingPage(),)
+                          );
+                        }
+                      ),
                       _buildProfileTile(
                         Icons.security_outlined,
                         'Bảo mật',
@@ -219,6 +230,11 @@ class ProfilePage extends StatelessWidget {
                         Icons.language_outlined,
                         'Ngôn ngữ',
                         trailing: 'Tiếng Việt (VN)',
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LanguageSettingsPage(),));
+                        }
                       ),
                       _buildProfileTile(
                         Icons.remove_red_eye_outlined,
