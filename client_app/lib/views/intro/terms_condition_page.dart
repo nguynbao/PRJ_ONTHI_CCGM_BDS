@@ -11,27 +11,14 @@ class TermsConditionPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                // AppNavigator.pop(context);
-              },
-              icon: Icon(
-                Iconsax.arrow_left,
-                size: 30,
-                color: AppColor.textpriCol,
-              ),
-            ),
-            Text(
-              'Terms & Conditions',
-              style: TextStyle(
-                color: AppColor.textpriCol,
-                fontWeight: FontWeight.w700,
-                fontSize: 18,
-              ),
-            ),
-          ],
+        centerTitle: true, // quan trọng
+        title: Text(
+          'Terms & Conditions',
+          style: TextStyle(
+            color: AppColor.textpriCol,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
       ),
       body: Padding(

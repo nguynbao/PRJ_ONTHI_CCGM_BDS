@@ -1,6 +1,12 @@
+import 'package:client_app/views/intro/create_new_password_page.dart';
 import 'package:client_app/views/main_screen/profile/edit_profile/edit_profile.dart';
+import 'package:client_app/views/main_screen/profile/setting/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../intro/terms_condition_page.dart';
+import 'Security/security.dart';
+import 'helpcenter/helpcenter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -187,9 +193,28 @@ class ProfilePage extends StatelessWidget {
                           );
                         },
                       ),
-                      _buildProfileTile(Icons.settings_outlined, 'Cài đặt'),
+                      _buildProfileTile(
+                        Icons.settings_outlined,
+                        'Cài đặt',
+                        onTap: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SettingPage(),)
+                            );
+                        }
+                      ),
                       _buildProfileTile(Icons.notifications_none, 'Thông báo'),
-                      _buildProfileTile(Icons.security_outlined, 'Bảo mật'),
+                      _buildProfileTile(
+                        Icons.security_outlined,
+                        'Bảo mật',
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => SecurityPage(),
+                            ),
+                          );
+                        }
+                      ),
                       _buildProfileTile(
                         Icons.language_outlined,
                         'Ngôn ngữ',
@@ -202,10 +227,28 @@ class ProfilePage extends StatelessWidget {
                       _buildProfileTile(
                         Icons.receipt_long_outlined,
                         'Điều khoản & Điều kiện',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              // SỬA DỤNG TRANG MỚI
+                              builder: (context) => const TermsConditionPage(),
+                            ),
+                          );
+                        },
                       ),
                       _buildProfileTile(
                         Icons.help_outline,
                         'Trung tâm Trợ giúp',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              // SỬA DỤNG TRANG MỚI
+                              builder: (context) => const HelpCenterPage(),
+                            ),
+                          );
+                        },
                       ),
                       _buildProfileTile(Icons.mail_outline, 'Mời bạn bè'),
                     ],

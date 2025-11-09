@@ -8,7 +8,7 @@ class AppVector {
   static const String iconProfile = '${base}icon_profile$format';
   static const String iconTag = '${base}icon_tag$format';
   static const String iconSearch = '${base}icon_search$format';
-    static const String iconDone = '${base}icon_done$format';
+  static const String iconDone = '${base}icon_done$format';
   static const String iconQuestion = '${base}icon_question$format';
   static const String iconOclock = '${base}icon_oclock$format';
 }
