@@ -2,6 +2,7 @@
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
+import 'package:client_app/views/main_screen/exam/total_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -120,7 +121,13 @@ Future<void> showRemoveBottomSheet(
             // icon minh họa (SVG tuỳ dự án)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(title, style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
 
             const SizedBox(height: 8),
@@ -168,7 +175,6 @@ Future<void> showRemoveBottomSheet(
                                   ),
                                   Spacer(),
                                   SvgPicture.asset(AppVector.iconTag),
-                                  
                                 ],
                               ),
                               SizedBox(height: 5),
@@ -188,7 +194,7 @@ Future<void> showRemoveBottomSheet(
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
 
             // Buttons
@@ -201,7 +207,10 @@ Future<void> showRemoveBottomSheet(
                         Navigator.of(ctx).pop();
                         onSecondary?.call();
                       },
-                      child: Text(secondaryText, style: TextStyle(color: Colors.black),),
+                      child: Text(
+                        secondaryText,
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -222,4 +231,271 @@ Future<void> showRemoveBottomSheet(
       );
     },
   );
+}
+
+Future<void> showBackModalExam(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext dialogContext) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Rời bài kiểm tra",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColor.buttonprimaryCol,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(height: 15),
+              Text(
+                'BẠN CÓ CHẮC CHẮN MUỐN \n RỜI BÀI KIỂM TRA KHÔNG',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black38),
+              ),
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Tiếp tục làm bài"),
+              ),
+              SizedBox(height: 15),
+              TextButton(
+                onPressed: () => {
+                  Navigator.pop(context),
+                  Navigator.pop(context),
+                },
+                child: Text(
+                  "Rời đi",
+                  style: TextStyle(color: AppColor.buttonprimaryCol),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+
+  print("Dialog đã đóng xong.");
+}
+
+Widget _buildAnswerButton(
+  String option, // 'A', 'B', 'C', 'D'
+  String? selectedAnswer, // Đáp án đã chọn cho câu hỏi này
+  VoidCallback onTap,
+) {
+  // Xác định xem đáp án này có phải là đáp án đã chọn không
+  final bool isSelected = selectedAnswer == option;
+
+  // Định nghĩa màu dựa trên trạng thái chọn
+  final Color backgroundColor = isSelected ? Colors.blue : Colors.white;
+  final Color textColor = isSelected ? Colors.white : Colors.black;
+
+  return TextButton(
+    onPressed: onTap,
+    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+    child: Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: backgroundColor, // ✨ ÁP DỤNG MÀU NỀN THEO TRẠNG THÁI
+        border: Border.all(
+          color: Colors.grey.shade400,
+          width: 1,
+        ), // Thêm border cho đẹp
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          option,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: textColor, // ✨ ÁP DỤNG MÀU CHỮ THEO TRẠNG THÁI
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> showListAnswerBottomSheet(
+  BuildContext context,
+  int totalQuestions,
+  int answeredQuestions,
+  int questionIndex,
+  List<String?> selectedAnswers, // Danh sách đáp án đã chọn
+) async {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xffF4F2F2),
+
+    builder: (ctx) {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: Padding(
+          padding: const EdgeInsets.all(9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Danh sách các câu hỏi($answeredQuestions/$totalQuestions)",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Divider(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: List.generate(totalQuestions, (index) {
+                      final questionNumber = index + 1;
+
+                      // Lấy đáp án đã chọn cho câu hỏi hiện tại (index)
+                      final String? selectedOptionForQuestion =
+                          selectedAnswers.length > index
+                          ? selectedAnswers[index]
+                          : null;
+
+                      // Tô sáng dòng câu hỏi hiện tại
+                      final bool isCurrent = index == questionIndex;
+                      final Color rowColor = isCurrent
+                          ? Colors.blue.withOpacity(0.1)
+                          : Colors.transparent;
+
+                      return Container(
+                        color: rowColor,
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            // 1. Text Câu hỏi
+                            SizedBox(
+                              width:
+                                  80, // Giới hạn chiều rộng để căn chỉnh tốt hơn
+                              child: InkWell(
+                                onTap: () => print('Câu số $questionNumber'),
+                                child: Text(
+                                  "Câu hỏi $questionNumber",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // 2. Các nút đáp án (Sử dụng hàm trợ giúp)
+                            _buildAnswerButton(
+                              'A',
+                              selectedOptionForQuestion,
+                              () {
+                                // Thêm logic chuyển đến câu hỏi này
+                                Navigator.pop(context);
+                              },
+                            ),
+                            _buildAnswerButton(
+                              'B',
+                              selectedOptionForQuestion,
+                              () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                            _buildAnswerButton(
+                              'C',
+                              selectedOptionForQuestion,
+                              () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                            _buildAnswerButton(
+                              'D',
+                              selectedOptionForQuestion,
+                              () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Future<void> showSuccessModalExam(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext dialogContext) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Nộp bài kiểm tra",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColor.buttonprimaryCol,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(height: 15),
+              Text(
+                'BẠN CÓ CHẮC CHẮN MUỐN \n NỘP BÀI KIỂM TRA KHÔNG',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black38),
+              ),
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => TotalExamPage()),
+                ),
+                child: Text("Nộp bài kiểm tra"),
+              ),
+              SizedBox(height: 15),
+              TextButton(
+                onPressed: () => {Navigator.pop(context)},
+                child: Text(
+                  "Quay lại",
+                  style: TextStyle(color: AppColor.buttonprimaryCol),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+
+  print("Dialog đã đóng xong.");
 }
