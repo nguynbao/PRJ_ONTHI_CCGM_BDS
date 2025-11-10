@@ -5,7 +5,6 @@ import 'package:client_app/views/main_screen/profile/notification/notification_s
 import 'package:client_app/views/main_screen/profile/setting/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../intro/terms_condition_page.dart';
 import 'Security/security.dart';
 import 'helpcenter/helpcenter.dart';
