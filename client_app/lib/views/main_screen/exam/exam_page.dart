@@ -1,6 +1,7 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/data/remote/user_service.dart';
+import 'package:client_app/views/main_screen/exam/all_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -81,6 +82,7 @@ class _ExamPageState extends State<ExamPage> {
                             'Khoá học số 2',
                             'Topic 1',
                             onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AllExamPage(courses: '',)));
                               print('1');
                             },
                           ),
