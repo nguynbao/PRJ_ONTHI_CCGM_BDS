@@ -2,6 +2,7 @@ import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
 import 'package:client_app/views/main_screen/exam/inside_exam_page.dart';
+import 'package:client_app/views/main_screen/exam/review_exam_page.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -76,7 +77,7 @@ class TotalExamPage extends StatelessWidget {
                       ),
                       SizedBox(height: 30),
                       Container(
-                        height: 300.h,
+                        height: 320.h,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -105,7 +106,7 @@ class TotalExamPage extends StatelessWidget {
                               '10/10',
                               AppColor.buttomSecondCol,
                             ),
-                            SizedBox(height: 25),
+                            SizedBox(height: 15.h),
                             Divider(thickness: 0.2, indent: 30, endIndent: 30),
                             item(
                               AppIcons.imgStar,
@@ -125,7 +126,7 @@ class TotalExamPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               child: ElevatedButton(
-                onPressed: () => {},
+                onPressed: () => {Navigator.push(context, MaterialPageRoute(builder: (_)=> const ReviewExamPage()))},
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -223,19 +224,19 @@ class TotalExamPage extends StatelessWidget {
 
   Widget item(icon, String title, String content, Color color) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      padding:  EdgeInsets.symmetric(horizontal: 30.h, vertical: 15.w),
       child: Row(
         children: [
           Container(
-            height: 60,
-            width: 60,
+            height: 60.h,
+            width: 60.w,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Image.asset(icon, height: 40, width: 40),
           ),
-          SizedBox(width: 15),
+          SizedBox(width: 15.h),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -250,7 +251,7 @@ class TotalExamPage extends StatelessWidget {
               Text(
                 content,
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: 17.sp,
                   color: Colors.black38,
                   fontWeight: FontWeight.w800,
                 ),

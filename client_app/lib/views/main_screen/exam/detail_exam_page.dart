@@ -2,6 +2,7 @@ import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/inside_exam_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 class DetailExamPage extends StatelessWidget {
@@ -13,12 +14,15 @@ class DetailExamPage extends StatelessWidget {
       backgroundColor: Color(0xffD9D9D9),
       appBar: AppBar(
         toolbarHeight: 80,
-        title: Align(
-          alignment: Alignment.center,
-          child: Text(
-            "Topic số 1",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ),
+        title: Row(
+          children: [
+            Spacer(),
+            Text(
+              "Topic số 1",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+            Spacer(),
+          ],
         ),
         backgroundColor: AppColor.buttonprimaryCol,
         elevation: 4,
@@ -142,7 +146,7 @@ class DetailExamPage extends StatelessWidget {
                             Text(
                               "Bắt đầu làm bài kiểm tra",
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -233,22 +237,22 @@ class DetailExamPage extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            height: 60,
-            width: 60,
+            height: 60.h,
+            width: 60.w,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Image.asset(icon, height: 40, width: 40),
+            child: Image.asset(icon, height: 40.h, width: 40.w),
           ),
-          SizedBox(width: 15),
+          SizedBox(width: 15.h),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: 17.sp,
                   color: Colors.black,
                   fontWeight: FontWeight.w800,
                 ),
@@ -256,7 +260,7 @@ class DetailExamPage extends StatelessWidget {
               Text(
                 content,
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: 17.sp,
                   color: Colors.black38,
                   fontWeight: FontWeight.w800,
                 ),
