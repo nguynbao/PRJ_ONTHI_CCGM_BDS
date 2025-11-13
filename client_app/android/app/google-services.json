@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "519016317312",
+    "project_id": "ccmg-project",
+    "storage_bucket": "ccmg-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:519016317312:android:e972b14de82decc0c38165",
+        "android_client_info": {
+          "package_name": "com.automation.ccmg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCacT3jfB8BlPMRNUZGLdwJjk0SZyClMpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

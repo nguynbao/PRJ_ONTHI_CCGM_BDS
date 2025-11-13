@@ -5,6 +5,7 @@ import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/notication/notication_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_svg/svg.dart';
@@ -17,6 +18,24 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkFirebaseConnection(); // 🚨 Gọi hàm kiểm tra khi màn hình khởi tạo
+  }
+
+  void _checkFirebaseConnection() {
+    try {
+      // Ví dụ: Thử truy cập một dịch vụ Firebase (Firestore, Auth...)
+      final authInstance = FirebaseAuth.instance;
+      print("Firebase Auth instance OK: ${authInstance.currentUser}");
+      // Nếu không có lỗi xảy ra, Firebase đã kết nối thành công.
+    } catch (e) {
+      // Nếu có lỗi, có thể là do Firebase chưa được khởi tạo đúng
+      print("LỖI: Không thể truy cập Firebase Service: $e");
+    }
+  }
+
   int _currentIndex = 0;
 
   // Lưu trạng thái cuộn/scroll từng tab
@@ -25,7 +44,11 @@ class _MainScreenState extends State<MainScreen> {
   // Danh sách page (fragment)
   late final List<Widget> _pages = <Widget>[
     const HomePage(key: PageStorageKey('HomePage')),
-    const MyCoursesPage(key: PageStorageKey('MyCoursesPage'), courses: '..', topic: '..', ),// truyền giá trị thật),
+    const MyCoursesPage(
+      key: PageStorageKey('MyCoursesPage'),
+      courses: '..',
+      topic: '..',
+    ), // truyền giá trị thật),
     const ExamPage(key: PageStorageKey('ExamPage')),
     const NoticationPage(key: PageStorageKey('NoticationPage')),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
@@ -67,7 +90,7 @@ class _MainScreenState extends State<MainScreen> {
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark, // Android: icon đen
-        statusBarBrightness: Brightness.light,     // iOS: icon đen
+        statusBarBrightness: Brightness.light, // iOS: icon đen
       ),
       child: GestureDetector(
         onTap: _dismissKeyboard,
@@ -85,8 +108,14 @@ class _MainScreenState extends State<MainScreen> {
               currentIndex: _currentIndex,
               selectedItemColor: const Color(0xFF2196F3),
               unselectedItemColor: Colors.grey,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 11),
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 11,
+              ),
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
               showUnselectedLabels: true,

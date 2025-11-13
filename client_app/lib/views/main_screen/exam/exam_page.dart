@@ -71,46 +71,44 @@ class _ExamPageState extends State<ExamPage> {
             children: [
               Flexible(
                 flex: 1,
-                child: Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 250,
-                          child: tagLesson(
-                            'Khoá học số 2',
-                            'Topic 1',
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => AllExamPage(courses: '',)));
-                              print('1');
-                            },
-                          ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 250,
+                        child: tagLesson(
+                          'Khoá học số 2',
+                          'Topic 1',
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => AllExamPage(courses: '',)));
+                            print('1');
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 250,
-                          child: tagLesson(
-                            'Khoá học số 1',
-                            'Topic 2',
-                            onTap: () {
-                              print("2");
-                            },
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 250,
+                        child: tagLesson(
+                          'Khoá học số 1',
+                          'Topic 2',
+                          onTap: () {
+                            print("2");
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 250,
-                          child: tagLesson(
-                            'Khoá học số 3',
-                            'Topic 3',
-                            onTap: () {
-                              print('3');
-                            },
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        width: 250,
+                        child: tagLesson(
+                          'Khoá học số 3',
+                          'Topic 3',
+                          onTap: () {
+                            print('3');
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
