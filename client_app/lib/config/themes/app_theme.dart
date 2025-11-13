@@ -13,6 +13,6 @@ class AppTheme {
       ),
     ),
     fontFamily: 'Inter',
-    brightness: Brightness.dark
+    brightness: Brightness.light
   );
 }

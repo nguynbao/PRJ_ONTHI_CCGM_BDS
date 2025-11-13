@@ -82,6 +82,11 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
+            statusBarBrightness: Brightness.light, // Icon ĐEN (iOS)
+          ),
+
           backgroundColor: Colors.transparent,
           toolbarHeight: 100.h,
           title: Align(
@@ -131,7 +136,9 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () {},
                             child: Text(
                               'See All',
-                              style: TextStyle(color: AppColor.buttonprimaryCol),
+                              style: TextStyle(
+                                color: AppColor.buttonprimaryCol,
+                              ),
                             ),
                           ),
                         ],
@@ -143,11 +150,12 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal, // ✅ cuộn ngang
                           itemCount: HomePage.categories.length,
                           separatorBuilder: (_, __) =>
-                          const SizedBox(width: 12), // ✅ khoảng cách ngang
+                              const SizedBox(width: 12), // ✅ khoảng cách ngang
                           itemBuilder: (context, i) {
                             final selected = i == _selectedIndex;
                             return TextButton(
-                              onPressed: () => setState(() => _selectedIndex = i),
+                              onPressed: () =>
+                                  setState(() => _selectedIndex = i),
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
@@ -199,7 +207,9 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () {},
                             child: Text(
                               'See All',
-                              style: TextStyle(color: AppColor.buttonprimaryCol),
+                              style: TextStyle(
+                                color: AppColor.buttonprimaryCol,
+                              ),
                             ),
                           ),
                         ],
@@ -211,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                           scrollDirection: Axis.horizontal, // ✅ cuộn ngang
                           itemCount: HomePage.lesson.length,
                           separatorBuilder: (_, __) =>
-                          const SizedBox(width: 12), // ✅ khoảng cách ngang
+                              const SizedBox(width: 12), // ✅ khoảng cách ngang
                           itemBuilder: (context, i) {
                             final selected = i == _selectedIndexLesson;
                             return TextButton(
@@ -285,7 +295,8 @@ class _HomePageState extends State<HomePage> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [

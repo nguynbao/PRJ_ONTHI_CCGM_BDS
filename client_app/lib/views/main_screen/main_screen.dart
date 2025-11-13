@@ -3,7 +3,7 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
 import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
-import 'package:client_app/views/main_screen/notication/notication_page.dart';
+import 'package:client_app/views/main_screen/flash_card/flash_card_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,17 +21,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _checkFirebaseConnection(); // 🚨 Gọi hàm kiểm tra khi màn hình khởi tạo
+    _checkFirebaseConnection(); 
   }
 
   void _checkFirebaseConnection() {
     try {
-      // Ví dụ: Thử truy cập một dịch vụ Firebase (Firestore, Auth...)
       final authInstance = FirebaseAuth.instance;
       print("Firebase Auth instance OK: ${authInstance.currentUser}");
-      // Nếu không có lỗi xảy ra, Firebase đã kết nối thành công.
     } catch (e) {
-      // Nếu có lỗi, có thể là do Firebase chưa được khởi tạo đúng
       print("LỖI: Không thể truy cập Firebase Service: $e");
     }
   }
@@ -50,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
       topic: '..',
     ), // truyền giá trị thật),
     const ExamPage(key: PageStorageKey('ExamPage')),
-    const NoticationPage(key: PageStorageKey('NoticationPage')),
+    const FlashCardPage(key: PageStorageKey('FlashCardPage')),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
   ];
 
@@ -59,12 +56,9 @@ class _MainScreenState extends State<MainScreen> {
     _TabInfo(title: 'Trang chủ', svgPath: AppVector.iconHome),
     _TabInfo(title: 'Bài học', svgPath: AppVector.iconCourses),
     _TabInfo(title: 'Kiểm tra', svgPath: AppVector.iconExam),
-    _TabInfo(title: 'Thông báo', svgPath: AppVector.iconNoti),
+    _TabInfo(title: 'Ghi nhớ', svgPath: AppVector.icon),
     _TabInfo(title: 'Tài khoản', svgPath: AppVector.iconProfile),
   ];
-
-  // Tiêu đề app bar theo tab
-  String get _title => _tabs[_currentIndex].title;
 
   // Đóng bàn phím khi đổi tab / chạm nền
   void _dismissKeyboard() {
@@ -128,6 +122,7 @@ class _MainScreenState extends State<MainScreen> {
                     t.svgPath,
                     width: 24,
                     height: 24,
+                    color: Colors.black,
                     colorFilter: const ColorFilter.mode(
                       Colors.grey,
                       BlendMode.srcIn,
@@ -137,6 +132,7 @@ class _MainScreenState extends State<MainScreen> {
                     t.svgPath,
                     width: 24,
                     height: 24,
+                    color: Colors.black,
                     colorFilter: const ColorFilter.mode(
                       Color(0xFF2196F3),
                       BlendMode.srcIn,

@@ -3,6 +3,7 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/data/remote/user_service.dart';
 import 'package:client_app/views/main_screen/exam/all_exam_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 class ExamPage extends StatefulWidget {
@@ -45,7 +46,13 @@ class _ExamPageState extends State<ExamPage> {
         ? 'Hi, ...'
         : 'Hi, ${_displayName.isEmpty ? "User" : _displayName}';
     return Scaffold(
+      
       appBar: AppBar(
+         systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
+          statusBarBrightness: Brightness.light,  // Icon ĐEN (iOS)
+        ),
+      
         backgroundColor: Colors.transparent,
         toolbarHeight: 100,
         title: Align(

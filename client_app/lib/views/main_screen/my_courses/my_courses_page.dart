@@ -2,6 +2,7 @@ import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/widget/modal/show_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 class MyCoursesPage extends StatefulWidget {
@@ -27,6 +28,11 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+         systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
+          statusBarBrightness: Brightness.light,  // Icon ĐEN (iOS)
+        ),
+      
         backgroundColor: Colors.transparent,
         title: Align(
           alignment: Alignment.centerLeft,
