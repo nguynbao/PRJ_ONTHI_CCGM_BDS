@@ -1,3 +1,5 @@
+import 'package:client_app/config/assets/app_icons.dart';
+import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 
 // --- I. DATA MODEL (flashcard_model.dart) ---
@@ -116,23 +118,35 @@ class _FlashcardPageState extends State<FlashcardPage> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       titleSpacing: 16.0,
-      title: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      automaticallyImplyLeading: false,
+      title: Row(
         children: [
-          Text(
-            'Flashcard',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          Text(
-            'Ôn thi chứng chỉ hành nghề BĐS',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+          IconButton(onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+          (Route<dynamic> route) => false, 
+        );
+          },  icon: Image.asset(AppIcons.imgBack, color: Colors.black,) ),
+          Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Flashcard',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                'Ôn thi chứng chỉ hành nghề BĐS',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ),
         ],
       ),

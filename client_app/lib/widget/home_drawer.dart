@@ -1,4 +1,6 @@
 import 'package:client_app/config/themes/app_color.dart';
+import 'package:client_app/controllers/auth.controller.dart';
+import 'package:client_app/views/intro/signin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -25,7 +27,27 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AuthController _authController = AuthController();
     final drawerWidth = MediaQuery.of(context).size.width * 0.78;
+    void _handleLogout() async {
+    try {
+      await _authController.signOut();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged out successfully!')),
+      );
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const SigninPage()),
+          (Route<dynamic> route) => false, 
+        );
+      }
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: ${e.toString()}')),
+      );
+    }
+  }
 
     return Container(
       width: drawerWidth,
@@ -188,19 +210,25 @@ class HomeDrawer extends StatelessWidget {
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(14.r),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 10.w),
-                      Text(
-                        "Đăng xuất",
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
+                  child: InkWell(
+                    onTap: () {
+                      debugPrint('$context ,Đã ấn vào');
+                     _handleLogout();
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.logout, color: Colors.red),
+                        SizedBox(width: 10.w),
+                        Text(
+                          "Đăng xuất",
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

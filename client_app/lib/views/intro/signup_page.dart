@@ -2,7 +2,9 @@ import 'package:apptomate_custom_checkbox/apptomate_custom_checkbox.dart';
 import 'package:client_app/common/app_button.dart';
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/data/remote/auth_service.dart';
+import 'package:client_app/controllers/auth.controller.dart';
+
+import 'package:client_app/views/intro/fill_profile_page.dart'; // Import trang Profile mới
 import 'package:client_app/views/intro/signin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -19,7 +21,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
 
-  final _auth = AuthService();
+  final _auth = AuthController();
   bool _agree = false;
   bool _obscure = true;
   bool _loading = false;
@@ -44,7 +46,7 @@ class _SignupPageState extends State<SignupPage> {
     return null;
   }
 
-  Future<void> _onSignup() async {
+  Future<void> _onContinue() async {
     final formOk = _formKey.currentState?.validate() ?? false;
     if (!formOk) return;
     if (!_agree) {
@@ -53,51 +55,28 @@ class _SignupPageState extends State<SignupPage> {
       );
       return;
     }
+    
+    // 🔥 BƯỚC 1: CHUYỂN HƯỚNG SANG TRANG PROFILE VỚI DỮ LIỆU EMAIL/PASSWORD
     setState(() => _loading = true);
-    try {
-      await _auth.register(
-        email: _emailController.text.trim(),
-        password: _pwdController.text,
-      );
-      if (!mounted) return;
-
-      // Success
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: const Text('Success'),
-          content: const Text('Your account has been created.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // close dialog
-                Navigator.of(context).maybePop(); // back to previous (Sign In)
-              },
-              child: const Text('OK'),
-            ),
-          ],
+    
+    // Gửi dữ liệu email và password sang trang FillProfilePage
+    if (!mounted) return;
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FillProfilePage(
+          email: _emailController.text.trim(),
+          password: _pwdController.text,
         ),
-      );
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const SigninPage()));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Sign up failed: $e')));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+      ),
+    );
+    
+    // Đặt loading lại sau khi chuyển trang (Nếu không, loading sẽ bị lỗi sau khi quay lại)
+    setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Dùng SingleChildScrollView để tránh tràn khi mở bàn phím
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -118,14 +97,12 @@ class _SignupPageState extends State<SignupPage> {
                   _checkBoxConfirm(),
                   const SizedBox(height: 16),
 
-                  // Nút Sign Up
+                  // Nút Continue
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: AppButton(
-                      content: _loading ? 'Please wait...' : 'Sign Up',
-                      onPressed: () async {
-                        await _onSignup();
-                      },
+                      content: _loading ? 'Please wait...' : 'Continue',
+                      onPressed: _onContinue, // Đổi sang _onContinue
                     ),
                   ),
 
@@ -143,6 +120,9 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
+
+  // (Các widget _moveOnSignIn, _methodSignUp, _iconMethod, _optSignUp, _checkBoxConfirm, 
+  // _textFieldPwd, _textFieldEmail, _inputWrapper, _border, _titlePage giữ nguyên như code cũ của bạn)
 
   Widget _moveOnSignIn() {
     return Row(

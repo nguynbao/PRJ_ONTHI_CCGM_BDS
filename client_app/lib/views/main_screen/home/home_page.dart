@@ -1,3 +1,4 @@
+import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/data/remote/user_service.dart';
@@ -7,7 +8,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  // Thay đổi: onOpenDrawer là nullable (dùng dấu ?) và không cần 'required'
+  final void Function()? onOpenDrawer;
+
+  // Thay đổi: Bỏ 'required'
+  const HomePage({super.key, this.onOpenDrawer});
 
   static const categories = <String>[
     'Flutter',
@@ -45,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   final _userSvc = UserService();
   String _displayName = '';
   bool _loading = true;
+
   @override
   void initState() {
     super.initState();
@@ -62,15 +68,22 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
+      // Sử dụng `mounted` để tránh lỗi khi `context` không còn tồn tại
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
+      }
     }
   }
 
-  // ✅ item đang được chọn
   @override
   Widget build(BuildContext context) {
+    // Lưu ý: Scaffold.of(context) cần được đặt trong widget con của Scaffold
+    // Ở đây, HomePage đang return Scaffold, nhưng chúng ta cần Scaffold của HomeContainer
+    // Nếu HomePage được sử dụng bên trong một Scaffold khác, nó sẽ hoạt động.
+    final bool isDrawerOpen = Scaffold.of(context).isDrawerOpen;
+
     final title = _loading
         ? 'Hi, ...'
         : 'Hi, ${_displayName.isEmpty ? "User" : _displayName}';
@@ -86,22 +99,34 @@ class _HomePageState extends State<HomePage> {
             statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
             statusBarBrightness: Brightness.light, // Icon ĐEN (iOS)
           ),
-
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           toolbarHeight: 100.h,
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(color: Colors.black)),
-                SizedBox(height: 10.h),
-                Text(
-                  'What Would you like to learn Today?\nSearch Below.',
-                  style: TextStyle(fontSize: 13.sp, color: Colors.black45),
+          title: Row(
+            children: [
+              IconButton(
+                // Gọi callback tùy chọn, nếu null thì không làm gì
+                onPressed: widget.onOpenDrawer,
+                icon: Icon(
+                  // *** THAY ĐỔI LỚN NHẤT: Kiểm tra trạng thái Drawer
+                  isDrawerOpen ? Icons.close : Icons.menu,
+                  color: Colors.black,
+                  size: 28,
                 ),
-              ],
-            ),
+              ),
+              SizedBox(width: 20.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(color: Colors.black)),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'What Would you like to learn Today?\nSearch Below.',
+                    style: TextStyle(fontSize: 13.sp, color: Colors.black45),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         body: SafeArea(
@@ -110,15 +135,17 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 children: [
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.all(Radius.circular(20.r)),
-                    ),
-                  ),
-                  SizedBox(height: 10),
+                  // Container(
+                  //   height: 200,
+                  //   width: double.infinity,
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.blue,
+                  //     borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                  //   ),
+                  // ),
+                  _buildFeatureBanner(),
+
+                  const SizedBox(height: 10),
                   Column(
                     children: [
                       Row(
@@ -131,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           TextButton(
                             onPressed: () {},
                             child: Text(
@@ -143,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         height: 28,
                         child: ListView.separated(
@@ -189,12 +216,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Column(
                     children: [
                       Row(
                         children: [
-                          Text(
+                          const Text(
                             "Lesson",
                             style: TextStyle(
                               color: Colors.black,
@@ -202,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           TextButton(
                             onPressed: () {},
                             child: Text(
@@ -214,7 +241,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         height: 28,
                         child: ListView.separated(
@@ -260,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -274,7 +301,7 @@ class _HomePageState extends State<HomePage> {
                               flex: 2,
                               child: Container(
                                 width: double.infinity,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.black,
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(20),
@@ -286,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                               flex: 1,
                               child: Container(
                                 width: double.infinity,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.vertical(
                                     bottom: Radius.circular(20),
@@ -306,23 +333,24 @@ class _HomePageState extends State<HomePage> {
                                               color: AppColor.buttomThirdCol,
                                             ),
                                           ),
-                                          Spacer(),
+                                          const Spacer(),
                                           IconButton(
                                             onPressed: () => {},
                                             icon: SvgPicture.asset(
                                               AppVector.iconTag,
                                               height: 15,
                                               width: 15,
-                                              colorFilter: ColorFilter.mode(
-                                                Colors.black,
-                                                BlendMode.srcIn,
-                                              ),
+                                              colorFilter:
+                                                  const ColorFilter.mode(
+                                                    Colors.black,
+                                                    BlendMode.srcIn,
+                                                  ),
                                             ),
                                           ),
                                         ],
                                       ),
 
-                                      Text(
+                                      const Text(
                                         "Topic so 1",
                                         style: TextStyle(color: Colors.black),
                                       ),
@@ -344,4 +372,75 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Widget _buildFeatureBanner() => Container(
+    height: 180.h,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: AppColor.buttonprimaryCol,
+      borderRadius: BorderRadius.all(Radius.circular(15.r)),
+      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
+    ),
+    child: Stack(
+      children: [
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Opacity(
+            opacity: 0.2,
+            child: SvgPicture.asset(
+              AppVector.iconTag,
+              height: 100.h,
+              colorFilter: const ColorFilter.mode(
+                Colors.white,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Khóa học ưu đãi hôm nay!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'Flutter Developer Pro\nGiảm 50%',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColor.buttomSecondCol,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                child: Text(
+                  'Xem ngay',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }

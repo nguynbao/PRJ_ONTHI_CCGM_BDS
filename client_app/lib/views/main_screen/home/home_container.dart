@@ -1,7 +1,10 @@
-import 'package:client_app/views/main_screen/home/pages/flashcard.dart';
-import 'package:client_app/views/main_screen/home/pages/home_page.dart';
+import 'package:client_app/views/main_screen/home/flashcard.dart';
+import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:flutter/material.dart';
 import '../../../widget/home_drawer.dart';
+
+// Định nghĩa typedef cho hàm mở/đóng drawer
+typedef ToggleDrawerCallback = void Function();
 
 class HomeContainer extends StatefulWidget {
   const HomeContainer({super.key});
@@ -16,11 +19,8 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
   late AnimationController _drawerIconController;
   double _drawerWidth = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    FlashcardPage(),
-    // TuDienBDSPage(), // nếu có thêm page
-  ];
+  // *** THAY ĐỔI: Bỏ const và khai báo List<Widget> trong initState/build thay vì khai báo hằng
+  late List<Widget> _pages; 
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
   String _getTitle(int index) {
     switch (index) {
       case 0:
-        return 'Trang chủ';
+        return 'Trang chủ123';
       case 1:
         return 'Flashcard';
       case 2:
@@ -92,6 +92,13 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    // *** THAY ĐỔI: Khởi tạo _pages ở đây để truyền hàm _toggleDrawer
+    _pages = [
+      HomePage(onOpenDrawer: _toggleDrawer, ), // Truyền callback vào HomePage
+      const FlashcardPage(),
+      // TuDienBDSPage(),
+    ];
+
     return Stack(
       children: [
 
@@ -140,16 +147,19 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
             child: ClipRRect(
               borderRadius: BorderRadius.circular(_drawerOpen ? 25 : 0),
               child: Scaffold(
-                appBar: AppBar(
-                  title: Text(_getTitle(_selectedPage)),
-                  leading: IconButton(
-                    icon: AnimatedIcon(
-                      icon: AnimatedIcons.menu_close,
-                      progress: _drawerIconController,
-                    ),
-                    onPressed: _toggleDrawer,
-                  ),
-                ),
+                // appBar: AppBar(
+                //   // *** THAY ĐỔI: XÓA leading mặc định vì HomePage đã tự định nghĩa AppBar
+                //   // Nếu bạn muốn giữ lại AppBar ở đây, hãy xóa logic AppBar trong HomePage.dart
+                //   // Hiện tại, tôi sẽ giữ lại AppBar của HomeContainer để điều khiển hiệu ứng.
+                //   // title: Text(_getTitle(_selectedPage)),
+                //   leading: IconButton(
+                //     icon: AnimatedIcon(
+                //       icon: AnimatedIcons.menu_close,
+                //       progress: _drawerIconController,
+                //     ),
+                //     onPressed: _toggleDrawer,
+                //   ),
+                // ),
                 body: IndexedStack(
                   index: _selectedPage,
                   children: _pages,

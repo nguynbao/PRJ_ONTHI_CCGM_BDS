@@ -2,8 +2,8 @@ import 'package:apptomate_custom_checkbox/apptomate_custom_checkbox.dart';
 import 'package:client_app/common/app_button.dart';
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/data/local/token_storage.dart';
-import 'package:client_app/data/remote/auth_service.dart';
+import 'package:client_app/controllers/auth.controller.dart';
+import 'package:client_app/views/intro/signup_page.dart'; 
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -26,7 +26,7 @@ class _SigninPageState extends State<SigninPage> {
   bool _loading = false;
   bool _rememberMe = false;
 
-  final _auth = AuthService();
+  final _auth = AuthController();
 
   @override
   void dispose() {
@@ -55,27 +55,28 @@ class _SigninPageState extends State<SigninPage> {
 
     setState(() => _loading = true);
     try {
-      final data = await _auth.login(
+      // 🔥 GỌI PHƯƠNG THỨC ĐĂNG NHẬP FIREBASE
+      await _auth.signIn(
         email: _emailController.text.trim(),
         password: _pwdController.text,
       );
 
-      final token = data['token'] as String?;
-      if (token == null) throw Exception('Missing token');
-
-      await TokenStorage.save(token);
-
-      // (Tuỳ chọn) Remember me: lưu email vào SharedPreferences nếu muốn
-      // nếu bạn có lớp Storage riêng thì dùng ở đây.
-
       if (!mounted) return;
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const MainScreen()));
+      
+      // ✅ Đăng nhập thành công, Firebase Auth tự động cập nhật trạng thái
+      //    và AuthChecker (trong main.dart) sẽ tự động chuyển hướng sang MainScreen.
+      //    Chúng ta chỉ cần quay lại màn hình trước đó (hoặc đóng màn hình đăng nhập
+      //    nếu nó được push), hoặc popUntil root nếu muốn chắc chắn.
+      
+      // Sử dụng Navigator.of(context).pop() để đóng SigninPage
+      // và AuthChecker sẽ hiển thị MainScreen.
+     Navigator.push(context, MaterialPageRoute(builder: (_)=> const MainScreen()));
+
     } catch (e) {
       if (!mounted) return;
+      // Hiển thị lỗi từ AuthService (ví dụ: 'Mật khẩu không chính xác.')
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Login failed: $e')));
+          .showSnackBar(SnackBar(content: Text('Login failed: ${e.toString().replaceFirst('Exception: ', '')}')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -184,7 +185,7 @@ class _SigninPageState extends State<SigninPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: AppButton(
                       content: _loading ? 'Please wait...' : 'Sign In',
-                      onPressed: (){_onLogin();},
+                      onPressed:  _onLogin, 
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -223,7 +224,15 @@ class _SigninPageState extends State<SigninPage> {
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-          onPressed: () => Navigator.of(context).pushNamed('/signup'),
+          onPressed: () {
+            // Điều hướng sang màn hình Đăng ký
+            // Sử dụng pushReplacement vì SigninPage được gọi từ SignupPage,
+            // hoặc dùng push nếu bạn muốn người dùng có thể quay lại Signin.
+            // Trong luồng AuthChecker, dùng push Replacement là hợp lý hơn.
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const SignupPage()),
+            );
+          },
           child: const Text(
             'SIGN UP',
             style: TextStyle(
