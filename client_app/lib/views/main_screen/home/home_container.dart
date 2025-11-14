@@ -1,7 +1,7 @@
 import 'package:client_app/views/main_screen/home/flashcard.dart';
 import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:flutter/material.dart';
-import '../../../widget/home_drawer.dart';
+import '../../../widget/drawer/home_drawer.dart';
 
 // Định nghĩa typedef cho hàm mở/đóng drawer
 typedef ToggleDrawerCallback = void Function();
@@ -109,7 +109,7 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
           bottom: 0,
           width: _drawerWidth,
           child: HomeDrawer(
-            displayName: 'Sang',
+            // displayName: 'Sang',
             loading: false,
             onClose: _toggleDrawer,
             onItemSelected: _onDrawerItemSelected,

@@ -1,6 +1,6 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/data/remote/user_service.dart';
+import 'package:client_app/controllers/user.controller.dart';
 import 'package:client_app/views/main_screen/exam/all_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +14,7 @@ class ExamPage extends StatefulWidget {
 }
 
 class _ExamPageState extends State<ExamPage> {
-  final _userSvc = UserService();
+  final _userCtrl = UserController();
   String _displayName = '';
   bool _loading = true;
   @override
@@ -23,22 +23,21 @@ class _ExamPageState extends State<ExamPage> {
     _load();
   }
 
-  Future<void> _load() async {
-    try {
-      final name = await _userSvc.getDisplayName();
-      if (!mounted) return;
-      setState(() {
-        _displayName = (name ?? '').trim();
-        _loading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
-    }
-  }
+Future<void> _load() async {
+  setState(() {
+    _loading = true;
+  });
+
+  final name = await _userCtrl.getDisplayName();
+
+  if (!mounted) return;
+
+  setState(() {
+    _displayName = (name ?? 'Guest').trim();
+    _loading = false; // 🔥 QUAN TRỌNG: tắt trạng thái loading
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

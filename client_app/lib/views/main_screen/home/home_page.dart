@@ -1,17 +1,15 @@
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/data/remote/user_service.dart';
+import 'package:client_app/controllers/user.controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomePage extends StatefulWidget {
-  // Thay đổi: onOpenDrawer là nullable (dùng dấu ?) và không cần 'required'
   final void Function()? onOpenDrawer;
 
-  // Thay đổi: Bỏ 'required'
   const HomePage({super.key, this.onOpenDrawer});
 
   static const categories = <String>[
@@ -47,7 +45,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   int _selectedIndexLesson = 0;
-  final _userSvc = UserService();
+  final _userCtrl = UserController();
   String _displayName = '';
   bool _loading = true;
 
@@ -58,30 +56,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _load() async {
-    try {
-      final name = await _userSvc.getDisplayName();
-      if (!mounted) return;
-      setState(() {
-        _displayName = (name ?? '').trim();
-        _loading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      // Sử dụng `mounted` để tránh lỗi khi `context` không còn tồn tại
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
-      }
-    }
+    setState(() {
+      _loading = true;
+    });
+
+    final name = await _userCtrl.getDisplayName();
+
+    if (!mounted) return;
+
+    setState(() {
+      _displayName = (name ?? 'Guest').trim();
+      _loading = false; 
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lưu ý: Scaffold.of(context) cần được đặt trong widget con của Scaffold
-    // Ở đây, HomePage đang return Scaffold, nhưng chúng ta cần Scaffold của HomeContainer
-    // Nếu HomePage được sử dụng bên trong một Scaffold khác, nó sẽ hoạt động.
     final bool isDrawerOpen = Scaffold.of(context).isDrawerOpen;
 
     final title = _loading
@@ -135,14 +125,6 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 children: [
-                  // Container(
-                  //   height: 200,
-                  //   width: double.infinity,
-                  //   decoration: BoxDecoration(
-                  //     color: Colors.blue,
-                  //     borderRadius: BorderRadius.all(Radius.circular(20.r)),
-                  //   ),
-                  // ),
                   _buildFeatureBanner(),
 
                   const SizedBox(height: 10),

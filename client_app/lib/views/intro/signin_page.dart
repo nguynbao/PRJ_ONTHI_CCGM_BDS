@@ -16,7 +16,6 @@ class SigninPage extends StatefulWidget {
 }
 
 class _SigninPageState extends State<SigninPage> {
-  // ---- FORM & CONTROLLERS
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _pwdController = TextEditingController();
@@ -55,21 +54,13 @@ class _SigninPageState extends State<SigninPage> {
 
     setState(() => _loading = true);
     try {
-      // 🔥 GỌI PHƯƠNG THỨC ĐĂNG NHẬP FIREBASE
       await _auth.signIn(
         email: _emailController.text.trim(),
         password: _pwdController.text,
       );
 
       if (!mounted) return;
-      
-      // ✅ Đăng nhập thành công, Firebase Auth tự động cập nhật trạng thái
-      //    và AuthChecker (trong main.dart) sẽ tự động chuyển hướng sang MainScreen.
-      //    Chúng ta chỉ cần quay lại màn hình trước đó (hoặc đóng màn hình đăng nhập
-      //    nếu nó được push), hoặc popUntil root nếu muốn chắc chắn.
-      
-      // Sử dụng Navigator.of(context).pop() để đóng SigninPage
-      // và AuthChecker sẽ hiển thị MainScreen.
+    
      Navigator.push(context, MaterialPageRoute(builder: (_)=> const MainScreen()));
 
     } catch (e) {

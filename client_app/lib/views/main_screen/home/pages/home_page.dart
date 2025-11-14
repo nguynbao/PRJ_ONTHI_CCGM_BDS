@@ -1,6 +1,6 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/data/remote/user_service.dart';
+// import 'package:client_app/data/remote/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -39,32 +39,32 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   int _selectedIndexLesson = 0;
-  final _userSvc = UserService();
+  // final _userSvc = UserService();
   String _displayName = '';
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    // _load();
   }
 
-  Future<void> _load() async {
-    try {
-      final name = await _userSvc.getDisplayName();
-      if (!mounted) return;
-      setState(() {
-        final parts = (name ?? '').trim().split(' ');
-        _displayName = parts.isNotEmpty ? parts.first : 'User';
-        _loading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
-    }
-  }
+  // Future<void> _load() async {
+  //   try {
+  //     final name = await _userSvc.getDisplayName();
+  //     if (!mounted) return;
+  //     setState(() {
+  //       final parts = (name ?? '').trim().split(' ');
+  //       _displayName = parts.isNotEmpty ? parts.first : 'User';
+  //       _loading = false;
+  //     });
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     setState(() => _loading = false);
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

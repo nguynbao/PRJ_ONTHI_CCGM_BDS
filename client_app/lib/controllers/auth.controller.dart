@@ -1,12 +1,11 @@
 import 'package:client_app/models/user.model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
-/// Lớp Controller để xử lý tất cả các thao tác liên quan đến Firebase Authentication.
 class AuthController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  /// Helper để map Firebase User sang custom UserModel
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserModel _mapFirebaseUserToModel(User? user) {
     if (user == null) {
       throw Exception('Firebase User is null after successful operation.');
@@ -14,23 +13,45 @@ class AuthController {
     return UserModel.fromFirebaseUser(user);
   }
 
-  /// Phương thức Đăng ký (Sign Up) người dùng mới.
-  ///
-  /// Trả về UserModel nếu thành công, hoặc ném ra một ngoại lệ (Exception) nếu thất bại.
-  Future<UserModel> register({ // ✅ Trả về UserModel
+  Future<UserModel> register({
     required String email,
-    required String password, required String userName, required DateTime bod, required String phone, required String gender,
+    required String password,
+    required String userName,
+    required DateTime bod,
+    required String phone,
+    required String gender,
   }) async {
     try {
+      // 1. Tạo account trên Firebase Auth
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      debugPrint('Đăng ký thành công: Email $email, UID ${userCredential.user?.uid}');
-      
-      // 🔥 Trả về UserModel tùy chỉnh
-      return _mapFirebaseUserToModel(userCredential.user);
-      
+
+      final firebaseUser = userCredential.user;
+      if (firebaseUser == null) {
+        throw Exception('Không lấy được thông tin người dùng sau khi đăng ký.');
+      }
+
+      final uid = firebaseUser.uid;
+      debugPrint('Đăng ký thành công: Email $email, UID $uid');
+
+      // 2. Lưu thông tin người dùng vào Firestore (collection: users)
+      await _firestore.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'userName': userName,
+        'phone': phone,
+        'gender': gender,
+        'bod': Timestamp.fromDate(bod),      // lưu DateTime thành Timestamp
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      debugPrint('Đã lưu thông tin user vào Firestore cho UID: $uid');
+
+      // 3. Trả về UserModel tùy chỉnh
+      return _mapFirebaseUserToModel(firebaseUser);
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'weak-password') {
@@ -41,15 +62,17 @@ class AuthController {
         errorMessage = 'Lỗi đăng ký: ${e.message}';
       }
       throw Exception(errorMessage);
+    } on FirebaseException catch (e) {
+      // Lỗi từ Firestore
+      debugPrint('🔥 FIRESTORE ERROR: ${e.code} - ${e.message}');
+      throw Exception('Lỗi lưu dữ liệu vào Firestore: ${e.message}');
+      
     } catch (e) {
       throw Exception('Lỗi không xác định khi đăng ký: ${e.toString()}');
     }
   }
 
-  /// Phương thức Đăng nhập (Sign In) người dùng hiện có.
-  ///
-  /// Trả về UserModel nếu thành công, hoặc ném ra một ngoại lệ (Exception) nếu thất bại.
-  Future<UserModel> signIn({ // ✅ Trả về UserModel
+  Future<UserModel> signIn({
     required String email,
     required String password,
   }) async {
@@ -59,8 +82,7 @@ class AuthController {
         password: password,
       );
       debugPrint('Đăng nhập thành công: Email $email, UID ${userCredential.user?.uid}');
-      
-      // 🔥 Trả về UserModel tùy chỉnh
+    
       return _mapFirebaseUserToModel(userCredential.user);
 
     } on FirebaseAuthException catch (e) {
@@ -79,7 +101,7 @@ class AuthController {
   }
 
   /// Phương thức Đăng xuất (Sign Out).
-  Future<void> signOut() async { // ✅ Chỉ cần trả về Future<void>
+  Future<void> signOut() async { 
     await _firebaseAuth.signOut();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/auth.controller.dart';
+import 'package:client_app/controllers/user.controller.dart';
 import 'package:client_app/views/intro/signin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,43 +12,70 @@ enum DrawerItem {
   logout,
 }
 
-class HomeDrawer extends StatelessWidget {
-  final String displayName;
+class HomeDrawer extends StatefulWidget {
   final bool loading;
   final VoidCallback onClose;
   final Function(DrawerItem) onItemSelected;
 
   const HomeDrawer({
     super.key,
-    required this.displayName,
+
     required this.loading,
     required this.onClose,
     required this.onItemSelected,
   });
 
   @override
+  State<HomeDrawer> createState() => _HomeDrawerState();
+}
+
+class _HomeDrawerState extends State<HomeDrawer> {
+  final _userCtrl = UserController();
+  String _displayName = '';
+  bool _loading = true;
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+    });
+
+    final name = await _userCtrl.getDisplayName();
+
+    if (!mounted) return;
+
+    setState(() {
+      _displayName = (name ?? 'Guest').trim();
+      _loading = false; // 🔥 QUAN TRỌNG: tắt trạng thái loading
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final AuthController _authController = AuthController();
     final drawerWidth = MediaQuery.of(context).size.width * 0.78;
     void _handleLogout() async {
-    try {
-      await _authController.signOut();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logged out successfully!')),
-      );
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const SigninPage()),
-          (Route<dynamic> route) => false, 
+      try {
+        await _authController.signOut();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logged out successfully!')),
+        );
+        if (context.mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const SigninPage()),
+            (Route<dynamic> route) => false,
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logout failed: ${e.toString()}')),
         );
       }
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logout failed: ${e.toString()}')),
-      );
     }
-  }
 
     return Container(
       width: drawerWidth,
@@ -76,14 +104,18 @@ class HomeDrawer extends StatelessWidget {
                   CircleAvatar(
                     radius: 26.r,
                     backgroundColor: Colors.white,
-                    child: Icon(Icons.person, color: AppColor.buttonprimaryCol, size: 30),
+                    child: Icon(
+                      Icons.person,
+                      color: AppColor.buttonprimaryCol,
+                      size: 30,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      loading
-                          ? "Đang tải thông tin..."
-                          : "Hi, ${displayName.isEmpty ? 'Người dùng' : displayName}",
+                      widget.loading
+                          ? 'Hi, ...'
+                          : 'Hi, ${_displayName.isEmpty ? "User" : _displayName}',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -99,7 +131,6 @@ class HomeDrawer extends StatelessWidget {
               Divider(color: Colors.white.withOpacity(0.3), thickness: 0.8),
 
               // --- Mục chức năng chính ---
-
               _buildDrawerItem(
                 context,
                 icon: Icons.home_rounded,
@@ -107,7 +138,7 @@ class HomeDrawer extends StatelessWidget {
                 subtitle: "Trang chính",
                 gradient: [Colors.greenAccent, Colors.teal],
                 onTap: () {
-                  onItemSelected(DrawerItem.home);
+                  widget.onItemSelected(DrawerItem.home);
                   // onClose();
                 },
               ),
@@ -119,7 +150,7 @@ class HomeDrawer extends StatelessWidget {
                 subtitle: "Ôn tập nhanh",
                 gradient: [Colors.lightBlueAccent, Colors.blueAccent],
                 onTap: () {
-                  onItemSelected(DrawerItem.flashcard);
+                  widget.onItemSelected(DrawerItem.flashcard);
                   // onClose();
                 },
               ),
@@ -135,7 +166,6 @@ class HomeDrawer extends StatelessWidget {
               //     // onClose();
               //   },
               // ),
-
               SizedBox(height: 30.h),
               Divider(color: Colors.black12),
 
@@ -160,7 +190,7 @@ class HomeDrawer extends StatelessWidget {
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
-                    )
+                    ),
                   ],
                 ),
                 child: Column(
@@ -168,8 +198,11 @@ class HomeDrawer extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calendar_month_outlined,
-                            color: AppColor.buttonprimaryCol, size: 20.sp),
+                        Icon(
+                          Icons.calendar_month_outlined,
+                          color: AppColor.buttonprimaryCol,
+                          size: 20.sp,
+                        ),
                         SizedBox(width: 8.w),
                         Text(
                           "Lịch thi sắp tới",
@@ -181,7 +214,10 @@ class HomeDrawer extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 8.h),
-                    Text("Kỳ thi tháng 12/2024", style: TextStyle(fontSize: 14.sp)),
+                    Text(
+                      "Kỳ thi tháng 12/2024",
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
                     SizedBox(height: 3.h),
                     Text(
                       "Đăng ký trước 30/11",
@@ -200,12 +236,15 @@ class HomeDrawer extends StatelessWidget {
               // --- Logout ---
               GestureDetector(
                 onTap: () {
-                  onItemSelected(DrawerItem.logout);
-                  onClose();
+                  widget.onItemSelected(DrawerItem.logout);
+                  widget.onClose();
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 14.h,
+                    horizontal: 16.w,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red.shade50,
                     borderRadius: BorderRadius.circular(14.r),
@@ -213,7 +252,7 @@ class HomeDrawer extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       debugPrint('$context ,Đã ấn vào');
-                     _handleLogout();
+                      _handleLogout();
                     },
                     child: Row(
                       children: [
@@ -241,13 +280,13 @@ class HomeDrawer extends StatelessWidget {
   }
 
   Widget _buildDrawerItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required List<Color> gradient,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required List<Color> gradient,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: InkWell(
@@ -292,10 +331,7 @@ class HomeDrawer extends StatelessWidget {
                     ),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(fontSize: 13.sp, color: Colors.black54),
                     ),
                   ],
                 ),
