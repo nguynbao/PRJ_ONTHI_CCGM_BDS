@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../widget/home_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  // ✅ Đã thêm lại dữ liệu tĩnh bị thiếu
   static const categories = <String>[
     'Flutter',
     'Dart',
@@ -24,6 +22,7 @@ class HomePage extends StatefulWidget {
     'Security',
     'Design',
   ];
+
   static const lesson = <String>[
     'Flutter Cơ Bản',
     'Dart OOP & Collections',
@@ -37,36 +36,17 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   int _selectedIndexLesson = 0;
   final _userSvc = UserService();
   String _displayName = '';
   bool _loading = true;
 
-  late AnimationController _drawerIconController;
-  bool _drawerOpen = false;
-  double _drawerWidth = 0;
-
   @override
   void initState() {
     super.initState();
     _load();
-    _drawerIconController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    )..drive(CurveTween(curve: Curves.easeInOutCubic));
-  }
-
-  @override
-  void dispose() {
-    _drawerIconController.dispose();
-    super.dispose();
-  }
-
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _drawerWidth = MediaQuery.of(context).size.width * 0.75;
   }
 
   Future<void> _load() async {
@@ -81,136 +61,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
-    }
-  }
-
-  void _toggleDrawer() {
-    setState(() {
-      _drawerOpen = !_drawerOpen;
-      if (_drawerOpen) {
-        _drawerIconController.forward();
-      } else {
-        _drawerIconController.reverse();
-      }
-    });
-  }
-
-  void _onDrawerItemSelected(DrawerItem item) {
-    _toggleDrawer();
-    // ✅ Logic xử lý cho từng item
-    switch (item) {
-      case DrawerItem.dictionary:
-        print('Navigating to Dictionary');
-        break;
-      case DrawerItem.flashcard:
-        print('Navigating to Flashcard');
-        break;
-      case DrawerItem.logout:
-        print('Logging out...');
-        break;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Không lấy được tên: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Điều chỉnh độ rộng Drawer: 75% màn hình
-    _drawerWidth = MediaQuery.of(context).size.width * 0.75;
-
     final title = _loading ? 'Hi, ...' : 'Hi, $_displayName';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        body: Stack(
-          children: [
-            // --- 1. Drawer (Luôn nằm dưới) ---
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: _drawerWidth,
-              child: HomeDrawer(
-                displayName: _displayName,
-                loading: _loading,
-                onClose: _toggleDrawer,
-                onItemSelected: _onDrawerItemSelected,
-              ),
-            ),
-
-            // --- 2. Main Content (AnimatedContainer trượt) ---
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              // Trượt sang phải (độ rộng drawer - 40.w để lộ góc) và thu nhỏ
-              transform: Matrix4.translationValues(
-                _drawerOpen ? _drawerWidth - 40.w : 0,
-                0,
-                0,
-              )..scale(_drawerOpen ? 0.9 : 1.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(_drawerOpen ? 25.r : 0),
-                boxShadow: [
-                  if (_drawerOpen)
-                    const BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 20,
-                      offset: Offset(-5, 5), // Shadow nổi bật hơn
-                    ),
-                ],
-              ),
-              child: AbsorbPointer(
-                absorbing: _drawerOpen,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(_drawerOpen ? 25.r : 0),
-                  child: Scaffold(
-                    backgroundColor: Colors.white,
-                    appBar: _buildAppBar(title),
-                    body: _buildBody(),
-                  ),
-                ),
-              ),
-            ),
-
-            // --- 3. Icon Menu / X (Luôn nằm trên cùng) ---
-            // --- 3. Icon Menu / X (Luôn nằm trên cùng) ---
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10.h,
-              left: 10.w,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9), // nền trắng mờ
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    iconSize: 26.h,
-                    icon: AnimatedIcon(
-                      icon: AnimatedIcons.menu_close,
-                      progress: _drawerIconController,
-                      color: Colors.black,
-                    ),
-                    onPressed: _toggleDrawer,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        backgroundColor: Colors.white,
+        appBar: _buildAppBar(title),
+        body: _buildBody(),
       ),
     );
   }
@@ -220,36 +88,30 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       backgroundColor: Colors.transparent,
       elevation: 0,
       toolbarHeight: 100.h,
-      titleSpacing: 0,
-      automaticallyImplyLeading: false,
-      title: Padding(
-        // Cần padding đủ lớn để tránh đè lên Icon Menu/X
-        padding: EdgeInsets.only(left: 60.w),
-        child: Row(
-          children: [
-            // Avatar người dùng
-            CircleAvatar(
-              radius: 22.r,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=3'),
-            ),
-            SizedBox(width: 10.w),
-            // Title text
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(title,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold)),
-                SizedBox(height: 4.h),
-                Text('Hôm nay học gì nào?',
-                    style: TextStyle(fontSize: 13.sp, color: Colors.black54)),
-              ],
-            ),
-          ],
-        ),
+      titleSpacing: 20.w,
+      automaticallyImplyLeading: true, // sẽ tự hiện icon drawer mặc định
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: 22.r,
+            backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=3'),
+          ),
+          SizedBox(width: 10.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(title,
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold)),
+              SizedBox(height: 4.h),
+              Text('Hôm nay học gì nào?',
+                  style: TextStyle(fontSize: 13.sp, color: Colors.black54)),
+            ],
+          ),
+        ],
       ),
       actions: [
         IconButton(
@@ -271,11 +133,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             children: [
               _buildFeatureBanner(),
               SizedBox(height: 25.h),
-              _buildCategoriesSection(), // ✅ Đã khôi phục
+              _buildCategoriesSection(),
               SizedBox(height: 25.h),
-              _buildLessonSection(), // ✅ Đã khôi phục
+              _buildLessonSection(),
               SizedBox(height: 25.h),
-              _buildFeaturedCourse(), // ✅ Đã khôi phục
+              _buildFeaturedCourse(),
               SizedBox(height: 50.h),
             ],
           ),
@@ -283,8 +145,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
     );
   }
-
-  // --- UI Sections Khôi Phục ---
 
   Widget _buildSectionHeader({
     required String title,
@@ -433,7 +293,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         Row(
                           children: [
                             Text(
-                              'Khoa hoc so 2',
+                              'Khóa học số 2',
                               style: TextStyle(
                                 color: AppColor.buttonprimaryCol,
                                 fontSize: 13.sp,
@@ -442,7 +302,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             ),
                             const Spacer(),
                             IconButton(
-                              onPressed: () => {},
+                              onPressed: () {},
                               icon: SvgPicture.asset(
                                 AppVector.iconTag,
                                 height: 18.h,
@@ -458,7 +318,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                           ],
                         ),
                         Text(
-                          "Topic so 1: Xây dựng App E-commerce bằng Flutter",
+                          "Topic số 1: Xây dựng App E-commerce bằng Flutter",
                           style: TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
@@ -520,9 +380,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.buttomSecondCol,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r))),
+                  backgroundColor: AppColor.buttomSecondCol,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
                 child: Text('Xem ngay',
                     style: TextStyle(
                         fontSize: 14.sp, fontWeight: FontWeight.bold)),

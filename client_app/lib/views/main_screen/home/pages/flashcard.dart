@@ -330,26 +330,3 @@ class FlashcardSetCard extends StatelessWidget {
     );
   }
 }
-
-// --- IV. WIDGET TEST CHẠY THỬ (Có thể bỏ đi khi tích hợp vào ứng dụng chính) ---
-// void main() {
-//   runApp(const FlashcardAppTest());
-// }
-
-// class FlashcardAppTest extends StatelessWidget {
-//   const FlashcardAppTest({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Flashcard App Test',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//         scaffoldBackgroundColor: const Color(0xFFF0F2F5),
-//         cardColor: Colors.white,
-//       ),
-//       // Sử dụng FlashcardPage làm trang chính để test
-//       home: const FlashcardPage(),
-//     );
-//   }
-// }

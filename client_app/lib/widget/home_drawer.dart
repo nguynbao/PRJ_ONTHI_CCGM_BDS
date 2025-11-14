@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 enum DrawerItem {
-  dictionary,
+  home,
   flashcard,
+  // dictionary,
   logout,
 }
 
@@ -76,22 +77,42 @@ class HomeDrawer extends StatelessWidget {
               Divider(color: Colors.white.withOpacity(0.3), thickness: 0.8),
 
               // --- Mục chức năng chính ---
+
               _buildDrawerItem(
                 context,
-                icon: Icons.menu_book_rounded,
-                title: "Từ điển BĐS",
-                subtitle: "Thuật ngữ quan trọng",
+                icon: Icons.home_rounded,
+                title: "Trang chủ",
+                subtitle: "Trang chính",
                 gradient: [Colors.greenAccent, Colors.teal],
-                onTap: () => onItemSelected(DrawerItem.dictionary),
+                onTap: () {
+                  onItemSelected(DrawerItem.home);
+                  // onClose();
+                },
               ),
+
               _buildDrawerItem(
                 context,
                 icon: Icons.style_rounded,
                 title: "Flashcard",
                 subtitle: "Ôn tập nhanh",
                 gradient: [Colors.lightBlueAccent, Colors.blueAccent],
-                onTap: () => onItemSelected(DrawerItem.flashcard),
+                onTap: () {
+                  onItemSelected(DrawerItem.flashcard);
+                  // onClose();
+                },
               ),
+
+              // _buildDrawerItem(
+              //   context,
+              //   icon: Icons.menu_book_rounded,
+              //   title: "Từ điển BĐS",
+              //   subtitle: "Thuật ngữ quan trọng",
+              //   gradient: [Colors.greenAccent, Colors.teal],
+              //   onTap: () {
+              //     onItemSelected(DrawerItem.dictionary);
+              //     // onClose();
+              //   },
+              // ),
 
               SizedBox(height: 30.h),
               Divider(color: Colors.black12),
@@ -156,7 +177,10 @@ class HomeDrawer extends StatelessWidget {
 
               // --- Logout ---
               GestureDetector(
-                onTap: () => onItemSelected(DrawerItem.logout),
+                onTap: () {
+                  onItemSelected(DrawerItem.logout);
+                  onClose();
+                },
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
