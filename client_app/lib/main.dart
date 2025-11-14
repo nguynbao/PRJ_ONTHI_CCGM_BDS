@@ -15,7 +15,7 @@ void main() async {
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
   ));
-  runApp(ClientApp());
+  runApp(const ClientApp());
 }
 
 class ClientApp extends StatelessWidget {
@@ -24,17 +24,20 @@ class ClientApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(390, 844), // Kích thước thiết kế gốc
-      minTextAdapt: true, // scale text mềm mại
-      splitScreenMode: true, // hỗ trợ đa cửa sổ/tablet
+      designSize: const Size(390, 844), // Kích thước thiết kế gốc (iPhone 14-like)
+      minTextAdapt: true, // Scale text mượt mà dựa trên font scale
+      splitScreenMode: true, // Hỗ trợ tablet/multiple windows
+      useInheritedMediaQuery: true, // Kế thừa MediaQuery tốt hơn cho responsive
       builder: (context, child) {
         return MaterialApp(
+          title: 'Client App', // Thêm title cho app
           theme: AppTheme.appTheme,
           debugShowCheckedModeBanner: false,
-          home: child,
+          // Nếu có dark mode: darkTheme: AppTheme.darkTheme,
+          home: child, // MainScreen sẽ được wrap tự động
         );
       },
-      child: const MainScreen(),
+      child: const MainScreen(), // Home mặc định là MainScreen
     );
   }
 }

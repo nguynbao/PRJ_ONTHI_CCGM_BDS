@@ -1,5 +1,13 @@
+import 'package:client_app/views/intro/create_new_password_page.dart';
 import 'package:client_app/views/main_screen/profile/edit_profile/edit_profile.dart';
+import 'package:client_app/views/main_screen/profile/language/language.dart';
+import 'package:client_app/views/main_screen/profile/notification/notification_setting.dart';
+import 'package:client_app/views/main_screen/profile/setting/setting.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../intro/terms_condition_page.dart';
+import 'Security/security.dart';
+import 'helpcenter/helpcenter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -7,14 +15,13 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
+              blurRadius: 20.r,
               offset: const Offset(0, 10),
             ),
           ],
@@ -28,7 +35,7 @@ class ProfilePage extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  height: 160,
+                  height: 160.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -42,17 +49,17 @@ class ProfilePage extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
+                        blurRadius: 8.r,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: const Align(
+                  child: Align(
                     alignment: Alignment(0, -0.3),
                     child: Text(
                       "Hồ sơ cá nhân",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -62,12 +69,12 @@ class ProfilePage extends StatelessWidget {
 
                 // Ảnh đại diện nửa trong nửa ngoài
                 Positioned(
-                  bottom: -50,
+                  bottom: -50.h,
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: EdgeInsets.all(4.w),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
@@ -81,18 +88,18 @@ class ProfilePage extends StatelessWidget {
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
+                              blurRadius: 8.r,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: const CircleAvatar(
+                        child: CircleAvatar(
                           radius: 48,
                           backgroundColor: Colors.white,
                           child: Text(
                             'B',
                             style: TextStyle(
-                              fontSize: 32,
+                              fontSize: 32.sp,
                               color: Color(0xFF667EEA),
                               fontWeight: FontWeight.bold,
                             ),
@@ -103,7 +110,7 @@ class ProfilePage extends StatelessWidget {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: EdgeInsets.all(6.w),
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
@@ -121,18 +128,22 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 70),
+            SizedBox(height: 70.h),
 
             // Container thông tin người dùng và danh sách chức năng chung
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(
+                  color: Colors.grey.shade200,
+                  width: 1,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
-                    blurRadius: 12,
+                    blurRadius: 12.r,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -142,25 +153,25 @@ class ProfilePage extends StatelessWidget {
                   // Thông tin người dùng
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20.w),
                     decoration: const BoxDecoration(
                       color: Colors.transparent,
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'Bao Nguyen',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 20.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           'bao.nguyen@gmail.com',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: Colors.grey.shade600,
                           ),
                         ),
@@ -172,21 +183,88 @@ class ProfilePage extends StatelessWidget {
                   Column(
                     children: [
                       _buildProfileTile(
-                        Icons.person_outline, 'Chỉnh sửa tài khoản',
-                        onTap: (){
+                        Icons.person_outline,
+                        'Chỉnh sửa tài khoản',
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const EditProfilePage())
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfilePage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileTile(
+                        Icons.settings_outlined,
+                        'Cài đặt',
+                        onTap: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const GeneralSettingsPage(),)
+                            );
+                        }
+                      ),
+                      _buildProfileTile(
+                        Icons.notifications_none,
+                        'Thông báo',
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const NotificationSettingPage(),)
                           );
                         }
                       ),
-                      _buildProfileTile(Icons.settings_outlined, 'Cài đặt'),
-                      _buildProfileTile(Icons.notifications_none, 'Thông báo'),
-                      _buildProfileTile(Icons.security_outlined, 'Bảo mật'),
-                      _buildProfileTile(Icons.language_outlined, 'Ngôn ngữ', trailing: 'Tiếng Việt (VN)'),
-                      _buildProfileTile(Icons.remove_red_eye_outlined, 'Chế độ tối'),
-                      _buildProfileTile(Icons.receipt_long_outlined, 'Điều khoản & Điều kiện'),
-                      _buildProfileTile(Icons.help_outline, 'Trung tâm Trợ giúp'),
+                      _buildProfileTile(
+                        Icons.security_outlined,
+                        'Bảo mật',
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => SecurityPage(),
+                            ),
+                          );
+                        }
+                      ),
+                      _buildProfileTile(
+                        Icons.language_outlined,
+                        'Ngôn ngữ',
+                        trailing: 'Tiếng Việt (VN)',
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LanguageSettingsPage(),));
+                        }
+                      ),
+                      _buildProfileTile(
+                        Icons.remove_red_eye_outlined,
+                        'Chế độ tối',
+                      ),
+                      _buildProfileTile(
+                        Icons.receipt_long_outlined,
+                        'Điều khoản & Điều kiện',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              // SỬA DỤNG TRANG MỚI
+                              builder: (context) => const TermsConditionPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildProfileTile(
+                        Icons.help_outline,
+                        'Trung tâm Trợ giúp',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              // SỬA DỤNG TRANG MỚI
+                              builder: (context) => const HelpCenterPage(),
+                            ),
+                          );
+                        },
+                      ),
                       _buildProfileTile(Icons.mail_outline, 'Mời bạn bè'),
                     ],
                   ),
@@ -194,29 +272,28 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileTile(IconData icon, String title, {String? trailing, VoidCallback? onTap}) {
+  Widget _buildProfileTile(
+      IconData icon,
+      String title, {
+        String? trailing,
+        VoidCallback? onTap,
+      }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      margin: EdgeInsets.symmetric(horizontal: 4.w),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.black87, size: 28),
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        leading: Icon(icon, color: Colors.black87, size: 28.sp),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 16.sp,
             color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
@@ -233,10 +310,10 @@ class ProfilePage extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Icon(
               Icons.arrow_forward_ios,
-              size: 18,
+              size: 18.sp,
               color: Colors.grey.shade400,
             ),
           ],

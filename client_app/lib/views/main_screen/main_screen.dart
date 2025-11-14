@@ -1,9 +1,10 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
-import 'package:client_app/views/main_screen/home/home_page.dart';
-import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/flash_card/flash_card_page.dart';
+import 'package:client_app/views/main_screen/home/home_container.dart';
+import 'package:client_app/views/main_screen/home/pages/home_page.dart';
+import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -40,12 +41,8 @@ class _MainScreenState extends State<MainScreen> {
 
   // Danh sách page (fragment)
   late final List<Widget> _pages = <Widget>[
-    const HomePage(key: PageStorageKey('HomePage')),
-    const MyCoursesPage(
-      key: PageStorageKey('MyCoursesPage'),
-      courses: '..',
-      topic: '..',
-    ), // truyền giá trị thật),
+    const HomeContainer(key: PageStorageKey('HomePage')),
+    const MyCoursesPage(key: PageStorageKey('MyCoursesPage'), courses: '..', topic: '..', ),// truyền giá trị thật),
     const ExamPage(key: PageStorageKey('ExamPage')),
     const FlashCardPage(key: PageStorageKey('FlashCardPage')),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
