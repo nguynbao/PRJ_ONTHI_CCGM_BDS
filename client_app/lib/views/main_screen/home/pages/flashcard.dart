@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart'; // Thư viện cho PageTransitionSwitcher
 
-// --- I. DATA MODEL (flashcard_model.dart) ---
+// ====================================================================
+// I. DATA MODEL (flashcard_model.dart)
+// ====================================================================
+
 class FlashcardSet {
   final String title;
   final String subtitle;
@@ -53,7 +57,6 @@ final List<FlashcardSet> sampleSets = [
     difficulty: 'Nâng cao',
     markedCards: 3,
   ),
-  // Thêm nhiều thẻ hơn để kiểm tra ListView.builder
   FlashcardSet(
     title: 'Định giá và Quản lý BĐS',
     subtitle: 'Phương pháp định giá, quản lý tài sản',
@@ -72,163 +75,11 @@ final List<FlashcardSet> sampleSets = [
   ),
 ];
 
-// --- II. FLASHCARD PAGE WIDGET (flashcard_page.dart) ---
-class FlashcardPage extends StatefulWidget {
-  // Thường dùng static const routeName nếu dùng định tuyến named routes
-  static const String routeName = '/flashcardPage';
+// ====================================================================
+// II. FLASHCARD CARD WIDGET (flashcard_set_card.dart)
+// (Giữ nguyên)
+// ====================================================================
 
-  const FlashcardPage({super.key});
-
-  @override
-  State<FlashcardPage> createState() => _FlashcardPageState();
-}
-
-class _FlashcardPageState extends State<FlashcardPage> {
-  String _selectedTab = 'Tất cả';
-
-  // --- BUILD METHOD CHÍNH ---
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      // Chỉ sử dụng Padding cho phần body
-      body: Padding(
-        padding: const EdgeInsets.only(top: 10, left: 16.0, right: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // --- Thanh Chọn Lọc (Tab Menu) ---
-            _buildTabMenu(),
-            const SizedBox(height: 20),
-            // --- Danh Sách Bộ Flashcard (Sử dụng Expanded + ListView.builder) ---
-            Expanded(
-              child: _buildFlashcardList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- WIDGET METHOD: AppBar ---
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      titleSpacing: 16.0,
-      title: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Flashcard',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          Text(
-            'Ôn thi chứng chỉ hành nghề BĐS',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.bar_chart_rounded, color: Colors.black87),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.settings, color: Colors.black87),
-          onPressed: () {},
-        ),
-        const SizedBox(width: 8),
-      ],
-    );
-  }
-
-  // --- WIDGET METHOD: Tab Menu ---
-  Widget _buildTabMenu() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: <Widget>[
-          _buildTabButton('Tất cả', 5, Icons.grid_view_rounded),
-          _buildTabButton('Đánh dấu', 5, Icons.star_rounded),
-          _buildTabButton('Theo chuyên đề', null, Icons.book_rounded),
-          _buildTabButton('Cần luyện', null, Icons.local_fire_department_rounded),
-          _buildTabButton('Của tôi', null, Icons.person_rounded),
-        ],
-      ),
-    );
-  }
-
-  // --- WIDGET METHOD: Nút Tab ---
-  Widget _buildTabButton(String title, int? count, IconData icon) {
-    final bool isSelected = _selectedTab == title;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: OutlinedButton.icon(
-        onPressed: () {
-          setState(() {
-            _selectedTab = title;
-          });
-        },
-        style: OutlinedButton.styleFrom(
-          foregroundColor: isSelected ? Colors.white : Colors.blue,
-          backgroundColor: isSelected ? Colors.blue : Colors.white,
-          side: BorderSide(
-            color: isSelected ? Colors.blue : Colors.grey.shade300,
-            width: 1,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        ),
-        icon: count != null ? const SizedBox.shrink() : Icon(icon, size: 18),
-        label: Row(
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            if (count != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 4.0),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : Colors.blue,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- WIDGET METHOD: Danh sách Card (Dùng ListView.builder) ---
-  Widget _buildFlashcardList() {
-    return ListView.builder(
-      itemCount: sampleSets.length,
-      itemBuilder: (context, index) {
-        return FlashcardSetCard(
-          set: sampleSets[index],
-        );
-      },
-    );
-  }
-}
-
-// --- III. CARD WIDGET (flashcard_set_card.dart) ---
 class FlashcardSetCard extends StatelessWidget {
   final FlashcardSet set;
 
@@ -241,7 +92,6 @@ class FlashcardSetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double completionPercentage = set.totalCards > 0 ? set.completedCards / set.totalCards : 0.0;
     final String percentText = (completionPercentage * 100).toStringAsFixed(0);
-    // Thay đổi màu progress dựa trên mức độ hoàn thành
     Color progressColor = completionPercentage >= 0.9 ? Colors.green.shade700 : (completionPercentage >= 0.5 ? Colors.blue : Colors.redAccent);
 
     return Card(
@@ -327,6 +177,121 @@ class FlashcardSetCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ====================================================================
+// III. FLASHCARD PAGE WIDGET (flashcard_page.dart) - ĐÃ LOẠI BỎ Scaffold VÀ AppBar
+// ====================================================================
+
+class FlashcardPage extends StatefulWidget {
+  const FlashcardPage({super.key});
+
+  @override
+  State<FlashcardPage> createState() => _FlashcardPageState();
+}
+
+class _FlashcardPageState extends State<FlashcardPage> {
+  String _selectedTab = 'Tất cả';
+
+  // --- BUILD METHOD CHÍNH ---
+  @override
+  Widget build(BuildContext context) {
+    // Trả về Widget body, không phải Scaffold
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, left: 16.0, right: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // --- Thanh Chọn Lọc (Tab Menu) ---
+          _buildTabMenu(),
+          const SizedBox(height: 20),
+
+          // --- Danh Sách Bộ Flashcard (Sử dụng Expanded + ListView.builder) ---
+          Expanded(
+            child: _buildFlashcardList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- WIDGET METHOD: Tab Menu ---
+  Widget _buildTabMenu() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: <Widget>[
+          _buildTabButton('Tất cả', sampleSets.length, Icons.grid_view_rounded),
+          _buildTabButton('Đánh dấu', 5, Icons.star_rounded),
+          _buildTabButton('Theo chuyên đề', null, Icons.book_rounded),
+          _buildTabButton('Cần luyện', null, Icons.local_fire_department_rounded),
+          _buildTabButton('Của tôi', null, Icons.person_rounded),
+        ],
+      ),
+    );
+  }
+
+  // --- WIDGET METHOD: Nút Tab ---
+  Widget _buildTabButton(String title, int? count, IconData icon) {
+    final bool isSelected = _selectedTab == title;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: OutlinedButton.icon(
+        onPressed: () {
+          setState(() {
+            _selectedTab = title;
+          });
+        },
+        style: OutlinedButton.styleFrom(
+          foregroundColor: isSelected ? Colors.white : Colors.blue,
+          backgroundColor: isSelected ? Colors.blue : Colors.white,
+          side: BorderSide(
+            color: isSelected ? Colors.blue : Colors.grey.shade300,
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
+        // Sửa icon: chỉ hiện icon nếu count == null (như code gốc của bạn)
+        icon: count != null ? const SizedBox.shrink() : Icon(icon, size: 18),
+        label: Row(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            if (count != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.blue,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- WIDGET METHOD: Danh sách Card (Dùng ListView.builder) ---
+  Widget _buildFlashcardList() {
+    return ListView.builder(
+      itemCount: sampleSets.length,
+      itemBuilder: (context, index) {
+        return FlashcardSetCard(
+          set: sampleSets[index],
+        );
+      },
     );
   }
 }
