@@ -1,3 +1,4 @@
+import 'package:client_app/models/topic.model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/course.model.dart';
 
@@ -19,7 +20,17 @@ class CourseController {
         .map((doc) => Course.fromFirestore(doc))
         .toList();
   }
+   Future<List<Topic>> getTopicsByCourse(String courseId) async {
+    final topicsRef = _coursesCol.doc(courseId).collection('topics');
 
+    final snapshot = await topicsRef
+        .orderBy('createdAt', descending: false)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => Topic.fromFirestore(doc, courseId: courseId))
+        .toList();
+  }
   Stream<List<Course>> watchAllCourses() {
     return _coursesCol
         .orderBy('createdAt', descending: false)

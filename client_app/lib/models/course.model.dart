@@ -36,14 +36,14 @@ class Course {
 
     return Course(
       id: doc.id,
-      name: (data['name'] ?? '').toString(),
+      name: (data['courseName'] ?? '').toString(),
       createdAt: created,
     );
   }
 
   Map<String, dynamic> toJson({bool includeCreatedAt = true}) {
     return {
-      'name': name,
+      'courseName': name,
       if (includeCreatedAt && createdAt != null)
         'createdAt': Timestamp.fromDate(createdAt!),
     };

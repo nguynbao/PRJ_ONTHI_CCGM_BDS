@@ -2,6 +2,7 @@ import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/course.controller.dart';
 import 'package:client_app/models/course.model.dart';
+import 'package:client_app/models/topic.model.dart';
 import 'package:client_app/widget/modal/show_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,25 +13,17 @@ class MyCoursesPage extends StatefulWidget {
 
   @override
   State<MyCoursesPage> createState() => _MyCoursesPageState();
-
-  // Thanh filter phía trên – tạm dùng list cố định
-  static const lesson = <String>[
-    'Flutter Cơ Bản',
-    'Dart OOP & Collections',
-    'State Management (Provider)',
-    'REST API & JSON',
-    'Navigation 2.0',
-    'Firebase Auth',
-  ];
 }
 
 class _MyCoursesPageState extends State<MyCoursesPage> {
   final _courseCtrl = CourseController();
 
-  int _selectedIndexLesson = 0;
-  bool _loading = true;
+  int _selectedCourseIndex = 0;
+  bool _loadingCourses = true;
+  bool _loadingTopics = false;
   String? _error;
   List<Course> _courses = [];
+  List<Topic> _topics = [];
 
   @override
   void initState() {
@@ -39,31 +32,67 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
   }
 
   Future<void> _loadCourses() async {
+    setState(() {
+      _loadingCourses = true;
+      _error = null;
+    });
+
     try {
-      final data = await _courseCtrl.getAllCourses();
+      final courses = await _courseCtrl.getAllCourses();
+      if (!mounted) return;
+
+      setState(() {
+        _courses = courses;
+        _loadingCourses = false;
+      });
+      if (_courses.isNotEmpty) {
+        _selectedCourseIndex = 0;
+        await _loadTopicsForSelectedCourse();
+      }
+    } catch (e) {
       if (!mounted) return;
       setState(() {
-        _courses = data;
-        _loading = false;
+        _error = e.toString();
+        _loadingCourses = false;
+      });
+    }
+  }
+
+  Future<void> _loadTopicsForSelectedCourse() async {
+    if (_courses.isEmpty) return;
+
+    final course = _courses[_selectedCourseIndex];
+
+    setState(() {
+      _loadingTopics = true;
+    });
+
+    try {
+      final topics = await _courseCtrl.getTopicsByCourse(course.id);
+      if (!mounted) return;
+      setState(() {
+        _topics = topics;
+        _loadingTopics = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _error = e.toString();
-        _loading = false;
+        _loadingTopics = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasCourses = _courses.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
-          statusBarBrightness: Brightness.light, // Icon ĐEN (iOS)
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
-        automaticallyImplyLeading: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Row(
@@ -78,7 +107,7 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
             const Spacer(),
             IconButton(
               onPressed: () {
-                // TODO: mở màn search course
+                // TODO: Search nếu cần
               },
               icon: SvgPicture.asset(AppVector.iconSearch),
             ),
@@ -90,53 +119,15 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              // ====== FILTER HORIZONTAL ======
+             
               SizedBox(
                 height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: MyCoursesPage.lesson.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, i) {
-                    final selected = i == _selectedIndexLesson;
-                    return TextButton(
-                      onPressed: () =>
-                          setState(() => _selectedIndexLesson = i),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        foregroundColor:
-                            selected ? AppColor.buttomSecondCol : Colors.grey,
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColor.buttomSecondCol
-                              : const Color(0xffE8F1FF),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Text(
-                          MyCoursesPage.lesson[i],
-                          style: TextStyle(
-                            color: selected ? Colors.white : Colors.grey,
-                            fontSize: 15,
-                            fontWeight:
-                                selected ? FontWeight.w700 : FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                child: _buildCourseChips(),
               ),
               const SizedBox(height: 20),
+
               Expanded(
-                child: _buildCoursesBody(),
+                child: _buildTopicsBody(hasCourses),
               ),
             ],
           ),
@@ -145,59 +136,123 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
     );
   }
 
-  Widget _buildCoursesBody() {
-    if (_loading) {
+ Widget _buildCourseChips() {
+  if (_loadingCourses) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (_courses.isEmpty) {
+    return const Align(
+      alignment: Alignment.centerLeft,
+      child: Text('Chưa có khóa học nào trong Firestore'),
+    );
+  }
+
+  return ListView.separated(
+    scrollDirection: Axis.horizontal,
+    itemCount: _courses.length,
+    separatorBuilder: (_, __) => const SizedBox(width: 12),
+    itemBuilder: (context, i) {
+      final selected = i == _selectedCourseIndex;
+      final courseName = _courses[i].name; // 👈 TÊN KHÓA HỌC TỪ FIREBASE
+
+      return TextButton(
+        onPressed: () async {
+          setState(() {
+            _selectedCourseIndex = i;
+          });
+          await _loadTopicsForSelectedCourse(); // load topics của course đang chọn
+        },
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          foregroundColor:
+              selected ? AppColor.buttomSecondCol : Colors.grey,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColor.buttomSecondCol
+                : const Color(0xffE8F1FF),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Text(
+            courseName, // 👈 HIỂN THỊ TÊN COURSE Ở ĐÂY
+            style: TextStyle(
+              color: selected ? Colors.white : Colors.grey,
+              fontSize: 15,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+  Widget _buildTopicsBody(bool hasCourses) {
+    if (!hasCourses) {
+      return const Center(
+        child: Text(
+          'Hãy tạo ít nhất 1 khóa học trong Firestore (collection "courses")',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    if (_loadingTopics) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error != null) {
+    if (_error != null && _topics.isEmpty) {
       return Center(
         child: Text(
-          'Có lỗi xảy ra:\n$_error',
-          textAlign: TextAlign.center,
+          'Lỗi: $_error',
           style: const TextStyle(color: Colors.red),
         ),
       );
     }
 
-    if (_courses.isEmpty) {
+    if (_topics.isEmpty) {
       return const Center(
-        child: Text(
-          'Hiện bạn chưa có khóa học nào',
-          style: TextStyle(fontSize: 16),
-        ),
+        child: Text('Khóa học này hiện chưa có topic nào'),
       );
     }
 
     return RefreshIndicator(
-      onRefresh: _loadCourses,
+      onRefresh: _loadTopicsForSelectedCourse,
       child: ListView.separated(
-        itemCount: _courses.length,
+        itemCount: _topics.length,
         separatorBuilder: (_, __) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
-          final c = _courses[index];
-          return _courseCard(c);
+          final topic = _topics[index];
+          return _topicCard(topic);
         },
       ),
     );
   }
 
-  Widget _courseCard(Course course) {
-    final createdText = course.createdAt != null
-        ? 'Ngày tạo: ${course.createdAt}'
+  // ========== CARD HIỂN THỊ 1 TOPIC ==========
+  Widget _topicCard(Topic topic) {
+    final createdText = topic.createdAt != null
+        ? 'Ngày tạo: ${topic.createdAt}'
         : 'Chưa có ngày tạo';
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () {
-        // TODO: điều hướng sang màn topics của course này
-        // Navigator.push(...);
+        // TODO: Navigate sang màn chi tiết topic nếu bạn muốn
       },
       child: SizedBox(
         width: double.infinity,
         child: Row(
           children: [
-            // Ảnh / thumbnail bên trái
+            // Khung đen bên trái (có thể gắn hình)
             Flexible(
               flex: 1,
               child: Container(
@@ -208,7 +263,6 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                     left: Radius.circular(20),
                   ),
                 ),
-                // TODO: bạn có thể cho NetworkImage / AssetImage khóa học ở đây
               ),
             ),
 
@@ -228,12 +282,12 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tên khóa học + icon
+                      // tên topic + icon
                       Row(
                         children: [
                           Expanded(
                             child: Text(
-                              course.name,
+                              topic.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -245,10 +299,10 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                           ),
                           IconButton(
                             onPressed: () {
-                              // Ví dụ: mở bottom sheet hỏi có remove khỏi MyCourses không
                               showRemoveBottomSheet(
                                 context,
-                                message: "Bạn có muốn xóa khóa học này khỏi My Courses?",
+                                message:
+                                    "Bạn muốn xóa topic này khỏi khóa học?",
                               );
                             },
                             icon: SvgPicture.asset(AppVector.iconTag),
@@ -256,8 +310,6 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-
-                      // Topic gợi ý / mô tả (tạm thời)
                       Text(
                         createdText,
                         style: TextStyle(
@@ -266,11 +318,9 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                           fontSize: 13,
                         ),
                       ),
-
                       const SizedBox(height: 4),
-
                       const Text(
-                        'Chạm để xem chi tiết khóa học & topic',
+                        'Chạm để xem chi tiết topic',
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 12,
