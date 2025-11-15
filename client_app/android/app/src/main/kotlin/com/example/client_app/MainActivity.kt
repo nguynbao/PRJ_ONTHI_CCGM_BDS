@@ -1,4 +1,4 @@
-package com.example.client_app
+package com.automation.ccmg
 
 import io.flutter.embedding.android.FlutterActivity
 

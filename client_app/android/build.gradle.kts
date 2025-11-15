@@ -6,10 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // ... (các classpath hiện có)
-        
-      
-        classpath 'com.google.gms:google-services:4.4.0' // Hoặc phiên bản mới nhất
+        classpath ("com.google.gms:google-services:4.4.0") // Hoặc phiên bản mới nhất
     }
 }
 
