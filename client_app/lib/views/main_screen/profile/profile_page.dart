@@ -1,4 +1,3 @@
-import 'package:client_app/views/intro/create_new_password_page.dart';
 import 'package:client_app/views/main_screen/profile/edit_profile/edit_profile.dart';
 import 'package:client_app/views/main_screen/profile/language/language.dart';
 import 'package:client_app/views/main_screen/profile/notification/notification_setting.dart';

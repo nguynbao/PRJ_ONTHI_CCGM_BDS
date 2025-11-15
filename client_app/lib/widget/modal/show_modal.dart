@@ -1,4 +1,3 @@
-// lib/shared/widgets/show_modal.dart
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';

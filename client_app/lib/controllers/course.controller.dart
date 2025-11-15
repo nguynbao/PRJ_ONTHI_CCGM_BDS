@@ -1,0 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/course.model.dart';
+
+class CourseController {
+  final FirebaseFirestore _db;
+
+  CourseController({FirebaseFirestore? firestore})
+      : _db = firestore ?? FirebaseFirestore.instance;
+
+  CollectionReference<Map<String, dynamic>> get _coursesCol =>
+      _db.collection('courses');
+
+  Future<List<Course>> getAllCourses() async {
+    final snapshot = await _coursesCol
+        .orderBy('createdAt', descending: false) 
+        .get();
+
+    return snapshot.docs
+        .map((doc) => Course.fromFirestore(doc))
+        .toList();
+  }
+
+  Stream<List<Course>> watchAllCourses() {
+    return _coursesCol
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map(
+          (query) => query.docs
+              .map((doc) => Course.fromFirestore(doc))
+              .toList(),
+        );
+  }
+}

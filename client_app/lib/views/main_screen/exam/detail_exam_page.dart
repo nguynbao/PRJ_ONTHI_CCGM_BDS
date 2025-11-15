@@ -3,7 +3,6 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/inside_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 
 class DetailExamPage extends StatelessWidget {
   const DetailExamPage({super.key});

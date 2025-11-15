@@ -1,12 +1,9 @@
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
-import 'package:client_app/views/main_screen/exam/exam_page.dart';
-import 'package:client_app/views/main_screen/exam/inside_exam_page.dart';
 import 'package:client_app/views/main_screen/exam/review_exam_page.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 
 class TotalExamPage extends StatelessWidget {
   const TotalExamPage({super.key});

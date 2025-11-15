@@ -77,18 +77,18 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
   }
 
 
-  String _getTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Trang chủ123';
-      case 1:
-        return 'Flashcard';
-      case 2:
-        return 'Từ điển BĐS';
-      default:
-        return '';
-    }
-  }
+  // String _getTitle(int index) {
+  //   switch (index) {
+  //     case 0:
+  //       return 'Trang chủ123';
+  //     case 1:
+  //       return 'Flashcard';
+  //     case 2:
+  //       return 'Từ điển BĐS';
+  //     default:
+  //       return '';
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

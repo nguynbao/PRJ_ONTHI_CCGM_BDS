@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../common/app_button.dart'; // Giả định AppButton nằm ở đây
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Màu chính (được sử dụng cho các Switch và OutlinedButton)
 const Color primaryBlue = Color(0xFF1877F2);

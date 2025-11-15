@@ -1,4 +1,3 @@
-import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/user.controller.dart';
