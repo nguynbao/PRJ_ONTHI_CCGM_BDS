@@ -39,7 +39,7 @@ class Topic {
 
     return Topic(
       id: doc.id,
-      name: (data['name'] ?? '').toString(),
+      name: (data['topicName'] ?? '').toString(),
       createdAt: created,
       courseId: courseId,
     );
@@ -47,7 +47,7 @@ class Topic {
 
   Map<String, dynamic> toJson({bool includeCreatedAt = true}) {
     return {
-      'name': name,
+      'topicName': name,
       if (includeCreatedAt && createdAt != null)
         'createdAt': Timestamp.fromDate(createdAt!),
     };

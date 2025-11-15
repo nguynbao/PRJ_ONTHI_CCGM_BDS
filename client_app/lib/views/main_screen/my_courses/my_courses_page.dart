@@ -119,16 +119,10 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-             
-              SizedBox(
-                height: 40,
-                child: _buildCourseChips(),
-              ),
+              SizedBox(height: 40, child: _buildCourseChips()),
               const SizedBox(height: 20),
 
-              Expanded(
-                child: _buildTopicsBody(hasCourses),
-              ),
+              Expanded(child: _buildTopicsBody(hasCourses)),
             ],
           ),
         ),
@@ -136,64 +130,60 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
     );
   }
 
- Widget _buildCourseChips() {
-  if (_loadingCourses) {
-    return const Center(child: CircularProgressIndicator());
-  }
+  Widget _buildCourseChips() {
+    if (_loadingCourses) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  if (_courses.isEmpty) {
-    return const Align(
-      alignment: Alignment.centerLeft,
-      child: Text('Chưa có khóa học nào trong Firestore'),
-    );
-  }
+    if (_courses.isEmpty) {
+      return const Align(
+        alignment: Alignment.centerLeft,
+        child: Text('Chưa có khóa học nào trong Firestore'),
+      );
+    }
 
-  return ListView.separated(
-    scrollDirection: Axis.horizontal,
-    itemCount: _courses.length,
-    separatorBuilder: (_, __) => const SizedBox(width: 12),
-    itemBuilder: (context, i) {
-      final selected = i == _selectedCourseIndex;
-      final courseName = _courses[i].name; // 👈 TÊN KHÓA HỌC TỪ FIREBASE
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: _courses.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, i) {
+        final selected = i == _selectedCourseIndex;
+        final courseName = _courses[i].name; // 👈 TÊN KHÓA HỌC TỪ FIREBASE
 
-      return TextButton(
-        onPressed: () async {
-          setState(() {
-            _selectedCourseIndex = i;
-          });
-          await _loadTopicsForSelectedCourse(); // load topics của course đang chọn
-        },
-        style: TextButton.styleFrom(
-          padding: EdgeInsets.zero,
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          foregroundColor:
-              selected ? AppColor.buttomSecondCol : Colors.grey,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
+        return TextButton(
+          onPressed: () async {
+            setState(() {
+              _selectedCourseIndex = i;
+            });
+            await _loadTopicsForSelectedCourse(); // load topics của course đang chọn
+          },
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: selected ? AppColor.buttomSecondCol : Colors.grey,
           ),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColor.buttomSecondCol
-                : const Color(0xffE8F1FF),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Text(
-            courseName, // 👈 HIỂN THỊ TÊN COURSE Ở ĐÂY
-            style: TextStyle(
-              color: selected ? Colors.white : Colors.grey,
-              fontSize: 15,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppColor.buttomSecondCol
+                  : const Color(0xffE8F1FF),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Text(
+              courseName, // 👈 HIỂN THỊ TÊN COURSE Ở ĐÂY
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.grey,
+                fontSize: 15,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildTopicsBody(bool hasCourses) {
     if (!hasCourses) {
@@ -211,17 +201,12 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
 
     if (_error != null && _topics.isEmpty) {
       return Center(
-        child: Text(
-          'Lỗi: $_error',
-          style: const TextStyle(color: Colors.red),
-        ),
+        child: Text('Lỗi: $_error', style: const TextStyle(color: Colors.red)),
       );
     }
 
     if (_topics.isEmpty) {
-      return const Center(
-        child: Text('Khóa học này hiện chưa có topic nào'),
-      );
+      return const Center(child: Text('Khóa học này hiện chưa có topic nào'));
     }
 
     return RefreshIndicator(
@@ -237,11 +222,17 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
     );
   }
 
-  // ========== CARD HIỂN THỊ 1 TOPIC ==========
   Widget _topicCard(Topic topic) {
-    final createdText = topic.createdAt != null
-        ? 'Ngày tạo: ${topic.createdAt}'
-        : 'Chưa có ngày tạo';
+    String formatDateBasic(DateTime? dt) {
+      if (dt == null) return 'Chưa có ngày tạo';
+      final d = dt.toLocal();
+      final day = d.day.toString().padLeft(2, '0');
+      final month = d.month.toString().padLeft(2, '0');
+      final year = d.year.toString();
+      return '$day/$month/$year';
+    }
+
+    final createdText = 'Ngày tạo: ${formatDateBasic(topic.createdAt)}';
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -319,12 +310,9 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Chạm để xem chi tiết topic',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
+                      Text(
+                        "Ấn vào để xem chi tiếc",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
                   ),
