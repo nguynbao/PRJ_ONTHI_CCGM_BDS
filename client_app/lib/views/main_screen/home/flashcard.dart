@@ -79,7 +79,9 @@ class FlashcardPage extends StatefulWidget {
   // Thường dùng static const routeName nếu dùng định tuyến named routes
   static const String routeName = '/flashcardPage';
 
-  const FlashcardPage({super.key});
+  final VoidCallback? onBackToHome;
+
+  const FlashcardPage({super.key, this.onBackToHome});
 
   @override
   State<FlashcardPage> createState() => _FlashcardPageState();
@@ -122,11 +124,18 @@ class _FlashcardPageState extends State<FlashcardPage> {
       title: Row(
         children: [
           IconButton(onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-          (Route<dynamic> route) => false, 
-        );
-          },  icon: Image.asset(AppIcons.imgBack, color: Colors.black,) ),
+
+            // ✅ GỌI CALLBACK NỘI BỘ ĐỂ CHUYỂN VỀ HomePage (index 0)
+            if (widget.onBackToHome != null) {
+              widget.onBackToHome!();
+            } else {
+              // Chỉ dùng pop() làm fallback nếu nó được push lên như một Route
+              Navigator.of(context).pop();
+            }
+
+          },
+            icon: Image.asset(AppIcons.imgBack, color: Colors.black),
+          ),
           Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

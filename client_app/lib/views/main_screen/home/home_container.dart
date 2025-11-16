@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:client_app/views/main_screen/home/flashcard.dart';
 import 'package:client_app/views/main_screen/home/home_page.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,13 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
     );
   }
 
+  void _backToHomePage() {
+    if (_selectedPage != 0) {
+      // Đổi trang nội bộ, PageTransitionSwitcher sẽ tự chạy animation
+      setState(() => _selectedPage = 0);
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -41,6 +49,16 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
   void dispose() {
     _drawerIconController.dispose();
     super.dispose();
+  }
+
+  void closeDrawerIfOpen() {
+    if (_drawerOpen) {
+      // Đặt state và chạy animation đóng
+      setState(() {
+        _drawerOpen = false;
+      });
+      _drawerIconController.reverse();
+    }
   }
 
   void _toggleDrawer() {
@@ -76,26 +94,26 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
     }
   }
 
+  String _getTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Trang chủ';
+      case 1:
+        return 'Flashcard';
+      case 2:
+        return 'Từ điển BĐS';
+      default:
+        return '';
+    }
+  }
 
-  // String _getTitle(int index) {
-  //   switch (index) {
-  //     case 0:
-  //       return 'Trang chủ123';
-  //     case 1:
-  //       return 'Flashcard';
-  //     case 2:
-  //       return 'Từ điển BĐS';
-  //     default:
-  //       return '';
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     // *** THAY ĐỔI: Khởi tạo _pages ở đây để truyền hàm _toggleDrawer
     _pages = [
-      HomePage(onOpenDrawer: _toggleDrawer, ), // Truyền callback vào HomePage
-      const FlashcardPage(),
+      HomePage(onOpenDrawer: _toggleDrawer, ), // Index 0 (Trang chủ)
+      FlashcardPage(onBackToHome: _backToHomePage),
       // TuDienBDSPage(),
     ];
 
@@ -116,20 +134,7 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
           ),
         ),
 
-        // 2️⃣ Tap ngoài drawer để đóng
-        if (_drawerOpen)
-          Positioned(
-            left: _drawerWidth, // CHỈ PHỦ PHẦN BÊN NGOÀI
-            top: 0,
-            bottom: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: _toggleDrawer,
-              behavior: HitTestBehavior.opaque,
-            ),
-          ),
-
-        // 3️⃣ Trang chính Animated
+        // 3️⃣ Trang chính Animated + overlay
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -142,32 +147,90 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
                 ? [const BoxShadow(color: Colors.black26, blurRadius: 20)]
                 : [],
           ),
-          child: AbsorbPointer(
-            absorbing: _drawerOpen,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(_drawerOpen ? 25 : 0),
-              child: Scaffold(
-                // appBar: AppBar(
-                //   // *** THAY ĐỔI: XÓA leading mặc định vì HomePage đã tự định nghĩa AppBar
-                //   // Nếu bạn muốn giữ lại AppBar ở đây, hãy xóa logic AppBar trong HomePage.dart
-                //   // Hiện tại, tôi sẽ giữ lại AppBar của HomeContainer để điều khiển hiệu ứng.
-                //   // title: Text(_getTitle(_selectedPage)),
-                //   leading: IconButton(
-                //     icon: AnimatedIcon(
-                //       icon: AnimatedIcons.menu_close,
-                //       progress: _drawerIconController,
-                //     ),
-                //     onPressed: _toggleDrawer,
-                //   ),
-                // ),
-                body: IndexedStack(
-                  index: _selectedPage,
-                  children: _pages,
+          child: Stack(
+            children: [
+              // --- Page chính ---
+              AbsorbPointer(
+                absorbing: _drawerOpen,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(_drawerOpen ? 25 : 0),
+                  child: Scaffold(
+                    body: PageTransitionSwitcher(
+                      // Giảm thời gian transition xuống mức hợp lý
+                      duration: const Duration(milliseconds: 1000),
+                      reverse: false,
+                      transitionBuilder: (child, animation, secondaryAnimation) {
+
+                        // --- 1. HIỆU ỨNG TRANG MỚI ĐI VÀO (Entry: dùng 'animation') ---
+
+                        // Hiệu ứng Trượt vào từ trên xuống (giữ nguyên logic của bạn)
+                        final entryOffsetAnimation = Tween<Offset>(
+                          begin: const Offset(0, -0.1), // Bắt đầu từ trên xuống
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ));
+
+                        // Hiệu ứng Mờ dần (Fade in) cho trang mới
+                        final entryFadeAnimation = CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        );
+
+                        // --- 2. HIỆU ỨNG TRANG CŨ ĐI RA (Exit: dùng 'secondaryAnimation') ---
+
+                        // Hiệu ứng làm mờ trang cũ đi ra
+                        // Tween đảo ngược độ mờ: 1.0 (hiện) -> 0.0 (mờ dần)
+                        final exitFadeAnimation = Tween<double>(
+                          begin: 1.0,
+                          end: 0.0,
+                        ).animate(CurvedAnimation(
+                          parent: secondaryAnimation, // Dùng secondaryAnimation cho trang cũ
+                          curve: Curves.easeOut,
+                        ));
+
+                        return FadeTransition(
+                          // Áp dụng hiệu ứng mờ cho trang cũ đi ra
+                          opacity: exitFadeAnimation,
+                          child: SlideTransition(
+                            // Áp dụng hiệu ứng trượt vào cho trang mới
+                            position: entryOffsetAnimation,
+                            child: FadeTransition(
+                              // Áp dụng hiệu ứng mờ vào cho trang mới (nếu cần thiết, nếu không có thể bỏ)
+                              opacity: entryFadeAnimation,
+                              child: child,
+                            ),
+                          ),
+                        );
+                      },
+                      child: KeyedSubtree(
+                        key: ValueKey(_selectedPage),
+                        child: _pages[_selectedPage],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+
+              // --- Overlay chỉ xuất hiện khi drawer mở ---
+              if (_drawerOpen)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: _toggleDrawer,
+                    behavior: HitTestBehavior.opaque,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(_drawerOpen ? 25 : 0),
+                      child: Container(
+                        color: Colors.black.withOpacity(0.1),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
+
       ],
     );
   }

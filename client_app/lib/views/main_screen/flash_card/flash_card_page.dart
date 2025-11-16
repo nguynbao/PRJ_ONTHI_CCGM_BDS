@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class FlashCardPage extends StatefulWidget {
-  const FlashCardPage({super.key});
+class CardPage extends StatefulWidget {
+  const CardPage({super.key});
 
   @override
-  State<FlashCardPage> createState() => _FlashCardPageState();
+  State<CardPage> createState() => _CardPageState();
 }
 
-class _FlashCardPageState extends State<FlashCardPage> {
+class _CardPageState extends State<CardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
