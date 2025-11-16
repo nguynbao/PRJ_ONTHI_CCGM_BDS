@@ -1,6 +1,8 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
+import 'package:client_app/controllers/course.controller.dart';
 import 'package:client_app/controllers/user.controller.dart';
+import 'package:client_app/models/course.model.dart';
 import 'package:client_app/views/main_screen/exam/all_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,29 +17,33 @@ class ExamPage extends StatefulWidget {
 
 class _ExamPageState extends State<ExamPage> {
   final _userCtrl = UserController();
+  final _courseCtrl = CourseController();
   String _displayName = '';
   bool _loading = true;
+  List<Course> _coursesWithExams = [];
   @override
   void initState() {
     super.initState();
     _load();
   }
 
-Future<void> _load() async {
-  setState(() {
-    _loading = true;
-  });
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+    });
 
-  final name = await _userCtrl.getDisplayName();
+    final name = await _userCtrl.getDisplayName();
+    final coursesFuture = _courseCtrl.getCoursesWithExams();
+    final courses = await coursesFuture;
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  setState(() {
-    _displayName = (name ?? 'Guest').trim();
-    _loading = false; // 🔥 QUAN TRỌNG: tắt trạng thái loading
-  });
-}
-
+    setState(() {
+      _displayName = (name ?? 'Guest').trim();
+      _coursesWithExams = courses;
+      _loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +51,12 @@ Future<void> _load() async {
         ? 'Hi, ...'
         : 'Hi, ${_displayName.isEmpty ? "User" : _displayName}';
     return Scaffold(
-      
       appBar: AppBar(
-         systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarIconBrightness: Brightness.dark, // Icon ĐEN (Android)
-          statusBarBrightness: Brightness.light,  // Icon ĐEN (iOS)
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
-      
+
         backgroundColor: Colors.transparent,
         toolbarHeight: 100,
         title: Align(
@@ -77,46 +82,77 @@ Future<void> _load() async {
             children: [
               Flexible(
                 flex: 1,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 250,
-                        child: tagLesson(
-                          'Khoá học số 2',
-                          'Topic 1',
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AllExamPage(courses: '',)));
-                            print('1');
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 250,
-                        child: tagLesson(
-                          'Khoá học số 1',
-                          'Topic 2',
-                          onTap: () {
-                            print("2");
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 250,
-                        child: tagLesson(
-                          'Khoá học số 3',
-                          'Topic 3',
-                          onTap: () {
-                            print('3');
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _coursesWithExams.isEmpty
+                ? const Center(child: Text('Không có khóa học nào có bài thi.'))
+                : ListView.builder( 
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _coursesWithExams.length,
+                            itemBuilder: (context, index) {
+                              final course = _coursesWithExams[index];
+                              return Padding(
+                                padding: EdgeInsets.only(right: 12),
+                                child: SizedBox(
+                                  width: 250,
+                                  child: tagLesson(
+                                    course.name, 
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AllExamPage(courseId: course.id), 
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                
+                // Row(
+                //   children: [
+                //     SizedBox(
+                //       width: 250,
+                //       child: tagLesson(
+                //         'Khoá học số 2',
+                //         onTap: () {
+                //           Navigator.push(
+                //             context,
+                //             MaterialPageRoute(
+                //               builder: (context) => AllExamPage(courses: ''),
+                //             ),
+                //           );
+                //           print('1');
+                //         },
+                //       ),
+                //     ),
+                //     const SizedBox(width: 12),
+                //     SizedBox(
+                //       width: 250,
+                //       child: tagLesson(
+                //         'Khoá học số 1',
+                //         onTap: () {
+                //           print("2");
+                //         },
+                //       ),
+                //     ),
+                //     const SizedBox(width: 12),
+                //     SizedBox(
+                //       width: 250,
+                //       child: tagLesson(
+                //         'Khoá học số 3',
+                //         onTap: () {
+                //           print('3');
+                //         },
+                //       ),
+                //     ),
+                //   ],
+                // ),
+              
+              
+              
               ),
               Flexible(
                 // flex: 1,
@@ -150,7 +186,7 @@ Future<void> _load() async {
                             AppColor.buttomThirdCol,
                             AppVector.iconOclock,
                             "Thời gian\n  Đã làm",
-                            size: 30
+                            size: 30,
                           ),
                         ],
                       ),
@@ -177,7 +213,7 @@ Future<void> _load() async {
         padding: const EdgeInsets.all(18.0),
         child: Column(
           children: [
-            SvgPicture.asset(icon, width: size ?? 24, height: size ?? 24,),
+            SvgPicture.asset(icon, width: size ?? 24, height: size ?? 24),
             SizedBox(height: 10),
             Text("0"),
             SizedBox(height: 10),
@@ -188,7 +224,7 @@ Future<void> _load() async {
     );
   }
 
-  Widget tagLesson(String courses, String topic, {VoidCallback? onTap}) {
+  Widget tagLesson(String courses, {VoidCallback? onTap}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // tăng vùng chạm
       onTap: onTap,
@@ -236,13 +272,6 @@ Future<void> _load() async {
                       ],
                     ),
                     SizedBox(height: 5),
-                    Text(
-                      topic,
-                      style: TextStyle(
-                        color: AppColor.textpriCol,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
                 ),
               ),

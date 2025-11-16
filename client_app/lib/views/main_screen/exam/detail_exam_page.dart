@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DetailExamPage extends StatelessWidget {
-  const DetailExamPage({super.key});
+  final String examId;
+  final String examName;
+  const DetailExamPage({super.key, required this.examId, required this.examName});
 
   @override
   Widget build(BuildContext context) {

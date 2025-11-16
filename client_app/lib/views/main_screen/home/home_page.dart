@@ -3,8 +3,11 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/course.controller.dart';
 import 'package:client_app/controllers/user.controller.dart';
 import 'package:client_app/models/course.model.dart';
+import 'package:client_app/providers/app_provider.dart';
+import 'package:client_app/views/main_screen/home/topic_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:client_app/models/topic.model.dart'; // ✅ Đã có import Topic model
@@ -20,7 +23,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Biến trạng thái
-  int _selectedTopicIndex = 0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
+  int _selectedTopicIndex =
+      0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
   String _displayName = ''; // Tên người dùng hiển thị
   bool _loading = true; // Cờ trạng thái tải dữ liệu
 
@@ -87,7 +91,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
   Widget _buildAppBarContent(BuildContext context, bool isDrawerOpen) {
     final title = _loading
         ? 'Chào, ...'
@@ -117,7 +120,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-
   }
 
   Widget _buildCategorySelector() {
@@ -149,9 +151,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {},
               child: Text(
                 'Xem tất cả',
-                style: TextStyle(
-                  color: AppColor.buttonprimaryCol,
-                ),
+                style: TextStyle(color: AppColor.buttonprimaryCol),
               ),
             ),
           ],
@@ -177,7 +177,9 @@ class _HomePageState extends State<HomePage> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: const Size(0, 40),
-                  foregroundColor: selected ? AppColor.buttomSecondCol : Colors.grey,
+                  foregroundColor: selected
+                      ? AppColor.buttomSecondCol
+                      : Colors.grey,
                 ),
                 child: Center(
                   child: Text(
@@ -212,7 +214,10 @@ class _HomePageState extends State<HomePage> {
     if (tenChuDeDuyNhat.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 10),
-        child: Text('Khóa học này chưa có chủ đề.', style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'Khóa học này chưa có chủ đề.',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -233,9 +238,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {},
               child: Text(
                 'Xem tất cả',
-                style: TextStyle(
-                  color: AppColor.buttonprimaryCol,
-                ),
+                style: TextStyle(color: AppColor.buttonprimaryCol),
               ),
             ),
           ],
@@ -256,7 +259,9 @@ class _HomePageState extends State<HomePage> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: const Size(0, 40),
-                  foregroundColor: selected ? AppColor.buttomSecondCol : Colors.grey,
+                  foregroundColor: selected
+                      ? AppColor.buttomSecondCol
+                      : Colors.grey,
                 ),
                 child: Center(
                   child: Text(
@@ -276,75 +281,77 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-  Widget _buildCourseCard({required String courseName, required String topicName}) {
+  Widget _buildCourseCard({
+    required String courseName,
+    required String topicName,
+    required void Function() onTap,
+  }) {
     return SizedBox(
       height: 250.h,
       width: 250.w,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ... (Phần hình ảnh)
-          Flexible(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(20),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ... (Phần hình ảnh)
+            Flexible(
+              flex: 2,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
               ),
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(20),
+            Flexible(
+              flex: 1,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(20),
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          courseName,
-                          style: TextStyle(
-                            color: AppColor.buttomThirdCol,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            courseName,
+                            style: TextStyle(color: AppColor.buttomThirdCol),
                           ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () => {},
-                          icon: SvgPicture.asset(
-                            AppVector.iconTag,
-                            height: 15,
-                            width: 15,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.black,
-                              BlendMode.srcIn,
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => {},
+                            icon: SvgPicture.asset(
+                              AppVector.iconTag,
+                              height: 15,
+                              width: 15,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.black,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      topicName,
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ],
+                        ],
+                      ),
+                      Text(
+                        topicName,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -420,8 +427,6 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
-
-
   @override
   Widget build(BuildContext context) {
     final scaffold = Scaffold.maybeOf(context);
@@ -439,7 +444,9 @@ class _HomePageState extends State<HomePage> {
         .toList();
 
     // 3. Xác định Tên Chủ đề đang được chọn (dựa trên index của danh sách TÊN DUY NHẤT)
-    final String tenChuDeDuocChon = tenChuDeDuyNhat.isNotEmpty && _selectedTopicIndex < tenChuDeDuyNhat.length
+    final String tenChuDeDuocChon =
+        tenChuDeDuyNhat.isNotEmpty &&
+            _selectedTopicIndex < tenChuDeDuyNhat.length
         ? tenChuDeDuyNhat[_selectedTopicIndex]
         : '';
 
@@ -484,7 +491,10 @@ class _HomePageState extends State<HomePage> {
 
                   // HIỂN THỊ DANH SÁCH THẺ ĐÃ LỌC
                   if (chuDeDaLoc.isEmpty && !_loading)
-                    const Text('Không có nội dung cho chủ đề đã chọn.', style: TextStyle(color: Colors.grey)),
+                    const Text(
+                      'Không có nội dung cho chủ đề đã chọn.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
 
                   if (chuDeDaLoc.isNotEmpty)
                     Column(
@@ -503,14 +513,29 @@ class _HomePageState extends State<HomePage> {
                           height: 250.h,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
-                            itemCount: chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
-                            separatorBuilder: (context, index) => SizedBox(width: 20.w),
+                            itemCount:
+                                chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
+                            separatorBuilder: (context, index) =>
+                                SizedBox(width: 20.w),
                             itemBuilder: (context, index) {
                               final topicDaLoc = chuDeDaLoc[index];
 
                               return _buildCourseCard(
                                 courseName: currentCourseName,
-                                topicName: topicDaLoc.name, // Lấy tên từ Topic đã lọc
+                                topicName:
+                                    topicDaLoc.name, // Lấy tên từ Topic đã lọc
+                                onTap: () {
+                                  final course = _danhSachKhoaHoc[index];
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TopicDetailPage(
+                                        courseId: course.id,
+                                        topicId: topicDaLoc.id,
+                                        topicName: topicDaLoc.name,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
