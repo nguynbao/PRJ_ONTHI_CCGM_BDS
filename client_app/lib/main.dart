@@ -3,27 +3,27 @@ import 'package:client_app/views/intro/signup_page.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
-  
 
   await Firebase.initializeApp();
-  
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  ));
-  
 
-  runApp(const ClientApp());
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
+  runApp(ProviderScope(child: ClientApp()));
 }
+
 class ClientApp extends StatelessWidget {
   const ClientApp({super.key});
 
@@ -39,10 +39,10 @@ class ClientApp extends StatelessWidget {
           title: 'Client App',
           theme: AppTheme.appTheme,
           debugShowCheckedModeBanner: false,
-          home: child, 
+          home: child,
         );
       },
-      child: const AuthChecker(), 
+      child: const AuthChecker(),
     );
   }
 }
@@ -55,24 +55,23 @@ class AuthChecker extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        
         if (snapshot.hasError) {
-         
-          return const Scaffold(body: Center(child: Text('Đã xảy ra lỗi kết nối.')));
+          return const Scaffold(
+            body: Center(child: Text('Đã xảy ra lỗi kết nối.')),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasData) {
-         
           return const MainScreen();
-        } 
-        
-        else {
+        } else {
           return const SignupPage();
-        } 
+        }
       },
     );
   }

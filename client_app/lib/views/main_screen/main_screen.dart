@@ -16,6 +16,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+final GlobalKey homeContainerKey = GlobalKey();
 class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
@@ -39,10 +40,11 @@ class _MainScreenState extends State<MainScreen> {
 
   // Danh sách page (fragment)
   late final List<Widget> _pages = <Widget>[
-    const HomeContainer(key: PageStorageKey('HomePage')),
+    HomeContainer(key: homeContainerKey),
+    // const HomeContainer(key: PageStorageKey('HomePage')),
     const MyCoursesPage(key: PageStorageKey('MyCoursesPage')),
     const ExamPage(key: PageStorageKey('ExamPage')),
-    const FlashCardPage(key: PageStorageKey('FlashCardPage')),
+    const CardPage(key: PageStorageKey('FlashCardPage')),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
   ];
 
@@ -137,8 +139,19 @@ class _MainScreenState extends State<MainScreen> {
                 );
               }),
               onTap: (i) {
-                if (i == _currentIndex) return;
+                if (i == _currentIndex) {
+                  if (i == 0 && homeContainerKey.currentState != null) {
+                    // SỬ DỤNG 'as dynamic' ĐỂ TRUY CẬP HÀM PRIVATE
+                    (homeContainerKey.currentState as dynamic)?.closeDrawerIfOpen();
+                  }
+                  return;
+                }
                 _dismissKeyboard();
+
+                if (homeContainerKey.currentState != null) {
+                  // SỬ DỤNG 'as dynamic' ĐỂ TRUY CẬP HÀM PRIVATE
+                  (homeContainerKey.currentState as dynamic)?.closeDrawerIfOpen();
+                }
                 setState(() => _currentIndex = i);
               },
             ),
