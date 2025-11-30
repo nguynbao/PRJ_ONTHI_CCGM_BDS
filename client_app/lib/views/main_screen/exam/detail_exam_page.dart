@@ -3,12 +3,10 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/inside_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// Thêm imports cần thiết
 import 'package:client_app/controllers/exam.controller.dart';
 import 'package:client_app/models/exam.model.dart';
 
-
-class DetailExamPage extends StatefulWidget { // ✅ CHUYỂN SANG StatefulWidget
+class DetailExamPage extends StatefulWidget {
   final String examId;
   final String courseId;
   final String examName; // Có thể giữ lại hoặc bỏ, nhưng ta sẽ dùng dữ liệu thật
@@ -19,7 +17,7 @@ class DetailExamPage extends StatefulWidget { // ✅ CHUYỂN SANG StatefulWidge
   State<DetailExamPage> createState() => _DetailExamPageState();
 }
 
-class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CLASS
+class _DetailExamPageState extends State<DetailExamPage> {
 
   final ExamController _examController = ExamController();
   late Future<Exam?> _examDetailsFuture;
@@ -64,7 +62,6 @@ class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CL
         final int totalQuestions = exam.questions.length;
         final int duration = exam.durationMinutes;
 
-        // --- GIAO DIỆN BÊN TRONG ---
         return Scaffold(
           backgroundColor: const Color(0xffD9D9D9),
           appBar: AppBar(
@@ -73,7 +70,7 @@ class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CL
               children: [
                 const Spacer(),
                 Text(
-                  exam.name, // ✅ DÙNG TÊN BÀI THI THẬT
+                  exam.name,
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                 ),
                 const Spacer(),
@@ -100,13 +97,13 @@ class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CL
                             children: [
                               box(
                                 AppIcons.imgBook,
-                                totalQuestions.toString(), // ✅ SỐ CÂU HỎI THẬT
+                                totalQuestions.toString(),
                                 'Câu hỏi',
                                 AppColor.buttonprimaryCol,
                               ),
                               box(
                                 AppIcons.imgTime,
-                                _formatTime(duration), // ✅ THỜI GIAN THẬT
+                                _formatTime(duration),
                                 'Thời gian',
                                 AppColor.buttomThirdCol,
                               ),
@@ -134,13 +131,13 @@ class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CL
                                 item(
                                   AppIcons.imgLich,
                                   'Ngày tạo',
-                                  '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}', // ✅ Dùng ngày hiện tại
+                                  '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
                                   AppColor.buttonprimaryCol,
                                 ),
                                 item(
                                   AppIcons.imgLich,
                                   'Chủ đề',
-                                  exam.name, // ✅ DÙNG ID KHÓA HỌC (hoặc tên nếu có)
+                                  exam.name,
                                   AppColor.buttomSecondCol,
                                 ),
                                 item(
@@ -215,7 +212,7 @@ class _DetailExamPageState extends State<DetailExamPage> { // ✅ TẠO STATE CL
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white, // ✅ THÊM MÀU CHỮ
+                                color: Colors.white,
                               ),
                             ),
                           ],

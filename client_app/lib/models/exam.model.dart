@@ -13,6 +13,7 @@ class Exam {
     required this.courseId,
     required this.questions,
     required this.durationMinutes
+
   });
 
   factory Exam.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -30,6 +31,7 @@ class Exam {
       courseId: (data['courseId'] ?? '').toString(),
       questions: rawQuestions,
       durationMinutes: duration,
+
     );
   }
 
@@ -37,8 +39,8 @@ class Exam {
     return {
       'name': name,
       'courseId': courseId,
-      'questions': questions,
       'durationMinutes': durationMinutes,
+      'questions': questions,
     };
   }
 }

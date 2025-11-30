@@ -305,7 +305,7 @@ class _ReviewExamPageState extends State<ReviewExamPage> {
     );
   }
 
-  // --- Hàm Xây dựng Đáp án (Review Mode) ĐÃ SỬA UI ---
+
   Widget _buildReviewAnswerBox({
     required String fullKey,       // Key Dài: "A. Tính..."
     required String answer,        // Nội dung đáp án (chính là fullKey)

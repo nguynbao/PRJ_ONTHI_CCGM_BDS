@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 
 class AllExamPage extends StatefulWidget {
   final String courseId;
+
   const AllExamPage({super.key,  required this.courseId, });
 
   @override
@@ -112,6 +113,7 @@ class _AllExamPageState extends State<AllExamPage> {
               examId: examId, 
               examName: examName,
               courseId: widget.courseId,
+
             )
           )
         ),

@@ -131,8 +131,7 @@ Future<List<String>> getAllExamNames(String courseId) async {
         return null;
       }
 
-      // ✅ Sử dụng Exam.fromFirestore để chuyển đổi DocumentSnapshot thành đối tượng Exam
-      // Chúng ta phải ép kiểu snapshot về DocumentSnapshot<Map<String, dynamic>>
+      // Ép kiểu snapshot về DocumentSnapshot<Map<String, dynamic>>
       return Exam.fromFirestore(snapshot as DocumentSnapshot<Map<String, dynamic>>);
 
     } catch (e) {
@@ -140,5 +139,4 @@ Future<List<String>> getAllExamNames(String courseId) async {
       return null;
     }
   }
-
 }

@@ -159,14 +159,13 @@ class TotalExamPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               child: ElevatedButton(
-                // ✅ SỬA LOGIC ONPRESSED: TRUYỀN DỮ LIỆU SANG REVIEW PAGE
                 onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (_) => ReviewExamPage(
                           courseId: courseId,
                           examId: examId,
-                          userAnswers: userAnswers, // TRUYỀN KẾT QUẢ ĐÃ LÀM
+                          userAnswers: userAnswers,
                         )
                     )
                 ),
