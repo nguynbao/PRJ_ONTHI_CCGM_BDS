@@ -118,4 +118,25 @@ Future<List<String>> getAllExamNames(String courseId) async {
     }
   }
 
+  Future<Exam?> getExamDetails({
+    required String courseId,
+    required String examId,
+  }) async {
+    try {
+      final examDocRef = _getExamsCol(courseId).doc(examId);
+      final snapshot = await examDocRef.get();
+
+      if (!snapshot.exists || snapshot.data() == null) {
+        print("Exam ID $examId không tồn tại trong Course $courseId.");
+        return null;
+      }
+
+      // Ép kiểu snapshot về DocumentSnapshot<Map<String, dynamic>>
+      return Exam.fromFirestore(snapshot as DocumentSnapshot<Map<String, dynamic>>);
+
+    } catch (e) {
+      print("Lỗi khi lấy chi tiết bài thi: $e");
+      return null;
+    }
+  }
 }

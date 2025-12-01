@@ -3,6 +3,7 @@ import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/total_exam_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 Future<void> showSuccessDialog(
@@ -64,7 +65,6 @@ Future<void> showSuccessDialog(
     },
   );
 
-  // Tự đóng sau thời gian chỉ định (nếu có)
   if (autoCloseAfter != null) {
     Future.delayed(autoCloseAfter, () {
       // Tránh lỗi nếu đã đóng
@@ -117,7 +117,6 @@ Future<void> showRemoveBottomSheet(
               ),
             ),
 
-            // icon minh họa (SVG tuỳ dự án)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
@@ -292,7 +291,7 @@ Future<void> showBackModalExam(BuildContext context) async {
 Widget _buildAnswerButton(
   String option, // 'A', 'B', 'C', 'D'
   String? selectedAnswer, // Đáp án đã chọn cho câu hỏi này
-  VoidCallback onTap,
+  VoidCallback? onTap,
 ) {
   // Xác định xem đáp án này có phải là đáp án đã chọn không
   final bool isSelected = selectedAnswer == option;
@@ -307,7 +306,7 @@ Widget _buildAnswerButton(
     child: Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: backgroundColor, // ✨ ÁP DỤNG MÀU NỀN THEO TRẠNG THÁI
+        color: backgroundColor,
         border: Border.all(
           color: Colors.grey.shade400,
           width: 1,
@@ -320,7 +319,7 @@ Widget _buildAnswerButton(
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: textColor, // ✨ ÁP DỤNG MÀU CHỮ THEO TRẠNG THÁI
+            color: textColor,
           ),
         ),
       ),
@@ -329,12 +328,13 @@ Widget _buildAnswerButton(
 }
 
 Future<void> showListAnswerBottomSheet(
-  BuildContext context,
-  int totalQuestions,
-  int answeredQuestions,
-  int questionIndex,
-  List<String?> selectedAnswers, // Danh sách đáp án đã chọn
-) async {
+    BuildContext context,
+    int totalQuestions,
+    int answeredQuestions,
+    int questionIndex,
+    List<String?> selectedAnswers, // Danh sách đáp án đã chọn (Là Key Dài hoặc null)
+    Function(int index) onJumpToQuestion,
+    ) async {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -363,30 +363,38 @@ Future<void> showListAnswerBottomSheet(
                     children: List.generate(totalQuestions, (index) {
                       final questionNumber = index + 1;
 
-                      // Lấy đáp án đã chọn cho câu hỏi hiện tại (index)
                       final String? selectedOptionForQuestion =
-                          selectedAnswers.length > index
+                      selectedAnswers.length > index
                           ? selectedAnswers[index]
                           : null;
 
-                      // Tô sáng dòng câu hỏi hiện tại
+                      // LƯU Ý: selectedOptionForQuestion LÀ KEY DÀI ("A. Tính pháp lý") HOẶC NULL
+
                       final bool isCurrent = index == questionIndex;
+                      final bool isAnswered = selectedOptionForQuestion != null;
+
                       final Color rowColor = isCurrent
-                          ? Colors.blue.withOpacity(0.1)
+                          ? Colors.blue.withOpacity(0.1) // Câu hiện tại
+                          : isAnswered
+                          ? AppColor.primaryBlue.withOpacity(0.1) // MÀU CHO CÂU ĐÃ TRẢ LỜI
                           : Colors.transparent;
 
-                      return Container(
-                        color: rowColor,
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // 1. Text Câu hỏi
-                            SizedBox(
-                              width:
-                                  80, // Giới hạn chiều rộng để căn chỉnh tốt hơn
-                              child: InkWell(
-                                onTap: () => print('Câu số $questionNumber'),
+                      void jumpToQuestion() {
+                        Navigator.pop(context);
+                        onJumpToQuestion(index);
+                      }
+
+                      return InkWell(
+                        onTap: jumpToQuestion,
+                        child: Container(
+                          color: rowColor,
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              // 1. Text Câu hỏi
+                              SizedBox(
+                                width: 80,
                                 child: Text(
                                   "Câu hỏi $questionNumber",
                                   style: const TextStyle(
@@ -395,39 +403,33 @@ Future<void> showListAnswerBottomSheet(
                                   ),
                                 ),
                               ),
-                            ),
 
-                            // 2. Các nút đáp án (Sử dụng hàm trợ giúp)
-                            _buildAnswerButton(
-                              'A',
-                              selectedOptionForQuestion,
-                              () {
-                                // Thêm logic chuyển đến câu hỏi này
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'B',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'C',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'D',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
+                              // 2. Các nút đáp án (Giờ chỉ để hiển thị trạng thái)
+                              // Vấn đề: Chúng ta chỉ lưu KEY DÀI, nên không thể so sánh 'A' với 'A. Tính pháp lý'
+                              // Ta sẽ chỉ so sánh Label ngắn ('A') với Label ngắn đã trích xuất từ Key Dài.
+
+                              _buildAnswerButton(
+                                'A',
+                                selectedOptionForQuestion?.startsWith('A') == true ? 'A' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'B',
+                                selectedOptionForQuestion?.startsWith('B') == true ? 'B' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'C',
+                                selectedOptionForQuestion?.startsWith('C') == true ? 'C' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'D',
+                                selectedOptionForQuestion?.startsWith('D') == true ? 'D' : null,
+                                null,
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }),
@@ -442,7 +444,10 @@ Future<void> showListAnswerBottomSheet(
   );
 }
 
-Future<void> showSuccessModalExam(BuildContext context) async {
+Future<void> showSuccessModalExam(
+    BuildContext context, {
+      VoidCallback? onConfirm,
+    }) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -452,13 +457,13 @@ Future<void> showSuccessModalExam(BuildContext context) async {
         insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
         backgroundColor: Colors.white,
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text( // Dùng const
                 "Nộp bài kiểm tra",
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -467,24 +472,24 @@ Future<void> showSuccessModalExam(BuildContext context) async {
                   fontSize: 20,
                 ),
               ),
-              SizedBox(height: 15),
-              Text(
+              const SizedBox(height: 15),
+              const Text(
                 'BẠN CÓ CHẮC CHẮN MUỐN \n NỘP BÀI KIỂM TRA KHÔNG',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black38),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => TotalExamPage()),
-                ),
-                child: Text("Nộp bài kiểm tra"),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onConfirm?.call();
+                },
+                child: const Text("Nộp bài kiểm tra"),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               TextButton(
                 onPressed: () => {Navigator.pop(context)},
-                child: Text(
+                child: const Text(
                   "Quay lại",
                   style: TextStyle(color: AppColor.buttonprimaryCol),
                 ),
@@ -497,4 +502,36 @@ Future<void> showSuccessModalExam(BuildContext context) async {
   );
 
   print("Dialog đã đóng xong.");
+}
+
+Future<void> showExplanationModal(BuildContext ctx1, String explanation) async {
+  await showDialog(
+    context: ctx1,
+    builder: (ctx1) {
+      return AlertDialog(
+        title: const Text(
+          "Giải thích đáp án",
+          style: TextStyle(
+            color: AppColor.buttonprimaryCol, fontWeight: FontWeight.bold
+          ),
+        ),
+        content: Container(
+          height: MediaQuery.of(ctx1).size.height * 0.4,
+          width: MediaQuery.of(ctx1).size.width * 0.6,
+          child: SingleChildScrollView(
+            child: Text(explanation),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx1),
+            child: const Text("Đóng"),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15)
+        ),
+      );
+    },
+  );
 }

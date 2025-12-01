@@ -4,14 +4,16 @@ class Exam {
   final String id;
   final String name;
   final String courseId;
-  
-  final Map<String, dynamic> questions; 
+  final Map<String, dynamic> questions;
+  final int durationMinutes;
 
   Exam({
     required this.id,
     required this.name,
     required this.courseId,
     required this.questions,
+    required this.durationMinutes
+
   });
 
   factory Exam.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -21,11 +23,15 @@ class Exam {
         ? Map<String, dynamic>.from(data['questions']) 
         : {};
 
+    final int duration = (data['durationMinutes'] as num? ?? 0).toInt();
+
     return Exam(
       id: doc.id,
       name: (data['name'] ?? '').toString(),
       courseId: (data['courseId'] ?? '').toString(),
-      questions: rawQuestions, 
+      questions: rawQuestions,
+      durationMinutes: duration,
+
     );
   }
 
@@ -33,7 +39,8 @@ class Exam {
     return {
       'name': name,
       'courseId': courseId,
-      'questions': questions, 
+      'durationMinutes': durationMinutes,
+      'questions': questions,
     };
   }
 }

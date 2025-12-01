@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class AllExamPage extends StatefulWidget {
+  final String courseId;
+
   const AllExamPage({super.key,  required this.courseId, });
 
   @override
   State<AllExamPage> createState() => _AllExamPageState();
 
-  final String courseId;
 }
 
 class _AllExamPageState extends State<AllExamPage> {
@@ -111,6 +112,8 @@ class _AllExamPageState extends State<AllExamPage> {
             builder: (_) => DetailExamPage(
               examId: examId, 
               examName: examName,
+              courseId: widget.courseId,
+
             )
           )
         ),
