@@ -1,10 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:client_app/views/main_screen/home/flashcard.dart';
 import 'package:client_app/views/main_screen/home/home_page.dart';
+import 'package:client_app/views/main_screen/home/dictionary.dart';
 import 'package:flutter/material.dart';
 import '../../../widget/drawer/home_drawer.dart';
 
-// Định nghĩa typedef cho hàm mở/đóng drawer
 typedef ToggleDrawerCallback = void Function();
 
 class HomeContainer extends StatefulWidget {
@@ -74,11 +74,11 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
 
   void _onDrawerItemSelected(DrawerItem item) async {
 
-    // 1️⃣ Đóng Drawer trước
+    // Đóng Drawer trước
     setState(() => _drawerOpen = false);
     await _drawerIconController.reverse();
 
-    // 2️⃣ Sau khi Drawer đóng xong mới đổi trang
+    // Sau khi Drawer đóng xong mới đổi trang
     switch (item) {
       case DrawerItem.home:
         setState(() => _selectedPage = 0);
@@ -86,9 +86,9 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
       case DrawerItem.flashcard:
         setState(() => _selectedPage = 1);
         break;
-      // case DrawerItem.dictionary:
-      //   setState(() => _selectedPage = 2);
-      //   break;
+      case DrawerItem.dictionary:
+        setState(() => _selectedPage = 2);
+        break;
       case DrawerItem.logout:
         break;
     }
@@ -114,13 +114,14 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
     _pages = [
       HomePage(onOpenDrawer: _toggleDrawer, ), // Index 0 (Trang chủ)
       FlashcardPage(onBackToHome: _backToHomePage),
+      DictionaryPage(onBackToHome: _backToHomePage),
       // TuDienBDSPage(),
     ];
 
     return Stack(
       children: [
 
-        // 1️⃣ Drawer luôn ở dưới
+        // Drawer luôn ở dưới
         Positioned(
           left: 0,
           top: 0,
@@ -134,7 +135,7 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
           ),
         ),
 
-        // 3️⃣ Trang chính Animated + overlay
+        // Trang chính Animated + overlay
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -161,8 +162,6 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
                       reverse: false,
                       transitionBuilder: (child, animation, secondaryAnimation) {
 
-                        // --- 1. HIỆU ỨNG TRANG MỚI ĐI VÀO (Entry: dùng 'animation') ---
-
                         // Hiệu ứng Trượt vào từ trên xuống (giữ nguyên logic của bạn)
                         final entryOffsetAnimation = Tween<Offset>(
                           begin: const Offset(0, -0.1), // Bắt đầu từ trên xuống
@@ -177,8 +176,6 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
                           parent: animation,
                           curve: Curves.easeOut,
                         );
-
-                        // --- 2. HIỆU ỨNG TRANG CŨ ĐI RA (Exit: dùng 'secondaryAnimation') ---
 
                         // Hiệu ứng làm mờ trang cũ đi ra
                         // Tween đảo ngược độ mờ: 1.0 (hiện) -> 0.0 (mờ dần)
@@ -213,7 +210,6 @@ class _HomeContainerState extends State<HomeContainer> with SingleTickerProvider
                 ),
               ),
 
-              // --- Overlay chỉ xuất hiện khi drawer mở ---
               if (_drawerOpen)
                 Positioned.fill(
                   child: GestureDetector(

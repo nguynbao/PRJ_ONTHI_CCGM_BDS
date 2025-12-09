@@ -1,80 +1,11 @@
 import 'package:client_app/config/assets/app_icons.dart';
-import 'package:client_app/views/main_screen/main_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../../../controllers/flashcard.controller.dart'; // Giả định FlashcardService nằm ở đây
+import '../../../models/flashcard_set.model.dart';
+import '../flash_card/add_flashcard.dart';
+import '../flash_card/flashcard_detail.dart';
 
-// --- I. DATA MODEL (flashcard_model.dart) ---
-class FlashcardSet {
-  final String title;
-  final String subtitle;
-  final int totalCards;
-  final int completedCards;
-  final String difficulty;
-  final int markedCards;
-
-  FlashcardSet({
-    required this.title,
-    required this.subtitle,
-    required this.totalCards,
-    required this.completedCards,
-    required this.difficulty,
-    required this.markedCards,
-  });
-}
-
-// Dữ liệu mẫu
-final List<FlashcardSet> sampleSets = [
-  FlashcardSet(
-    title: 'Luật Kinh doanh Bất động sản',
-    subtitle: 'Khái niệm, điều kiện, quyền và nghĩa vụ',
-    totalCards: 45,
-    completedCards: 32,
-    difficulty: 'Cơ bản',
-    markedCards: 12,
-  ),
-  FlashcardSet(
-    title: 'Môi giới Bất động sản',
-    subtitle: 'Điều kiện hành nghề, quyền và nghĩa vụ',
-    totalCards: 38,
-    completedCards: 15,
-    difficulty: 'Cơ bản',
-    markedCards: 8,
-  ),
-  FlashcardSet(
-    title: 'Hợp đồng Bất động sản',
-    subtitle: 'Các loại hợp đồng và điều khoản',
-    totalCards: 52,
-    completedCards: 40,
-    difficulty: 'Nâng cao',
-    markedCards: 15,
-  ),
-  FlashcardSet(
-    title: 'Thủ tục pháp lý BĐS',
-    subtitle: 'Quy trình, hồ sơ và các loại phí',
-    totalCards: 30,
-    completedCards: 5,
-    difficulty: 'Nâng cao',
-    markedCards: 3,
-  ),
-  // Thêm nhiều thẻ hơn để kiểm tra ListView.builder
-  FlashcardSet(
-    title: 'Định giá và Quản lý BĐS',
-    subtitle: 'Phương pháp định giá, quản lý tài sản',
-    totalCards: 60,
-    completedCards: 5,
-    difficulty: 'Cơ bản',
-    markedCards: 0,
-  ),
-  FlashcardSet(
-    title: 'Quy hoạch Đô thị',
-    subtitle: 'Pháp luật về quy hoạch, các loại đất',
-    totalCards: 75,
-    completedCards: 60,
-    difficulty: 'Nâng cao',
-    markedCards: 20,
-  ),
-];
-
-// --- II. FLASHCARD PAGE WIDGET (flashcard_page.dart) ---
 class FlashcardPage extends StatefulWidget {
   // Thường dùng static const routeName nếu dùng định tuyến named routes
   static const String routeName = '/flashcardPage';
@@ -88,9 +19,64 @@ class FlashcardPage extends StatefulWidget {
 }
 
 class _FlashcardPageState extends State<FlashcardPage> {
+  // Đảm bảo FlashcardService có thể truy cập được
+  final FlashcardService _flashcardService = FlashcardService();
   String _selectedTab = 'Tất cả';
 
-  // --- BUILD METHOD CHÍNH ---
+  @override
+  void initState() {
+    super.initState();
+    _loadTabCounts(); // Gọi hàm tải số liệu
+  }
+
+  // Hàm điều hướng đến trang tạo bộ đề mới
+  void _navigateToAddSet() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddFlashcardSetPage(),
+      ),
+    ).then((_) {
+      // Sau khi quay lại, tải lại số lượng tab để cập nhật 'Tất cả' và 'Của tôi'
+      _loadTabCounts();
+    });
+  }
+
+  Future<void> _loadTabCounts() async {
+    final userId = _flashcardService.userId;
+    if (userId == null) {
+      // Nếu chưa đăng nhập, chỉ tính tab 'Tất cả'
+      final allSets = await _flashcardService.getFlashcardSetsFuture(); // Cần tạo hàm Future này
+      setState(() {
+        _tabCounts['Tất cả'] = allSets.length;
+      });
+      return;
+    }
+
+    // Lấy dữ liệu cho các tab cá nhân
+    final allSetsFuture = _flashcardService.getFlashcardSetsFuture();
+    final savedSetsFuture = _flashcardService.getSavedSetsFuture(userId); // Cần tạo hàm Future này
+    final mySetsFuture = _flashcardService.getSetsCreatedByFuture(userId); // Cần tạo hàm Future này
+
+    final results = await Future.wait([allSetsFuture, savedSetsFuture, mySetsFuture]);
+
+    // Cập nhật State
+    setState(() {
+      _tabCounts['Tất cả'] = (results[0] as List).length;
+      // _tabCounts['Đánh dấu'] = (results[1] as List).length;
+      _tabCounts['Của tôi'] = (results[2] as List).length;
+      // (Bỏ qua 'Theo chuyên đề' và 'Cần luyện' trong ví dụ này)
+    });
+  }
+
+  Map<String, int> _tabCounts = {
+    'Tất cả': 0,
+    // 'Đánh giá': 0,
+    'Của tôi': 0,
+    'Theo chuyên đề': 0,
+    'Cần luyện': 0,
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,21 +87,24 @@ class _FlashcardPageState extends State<FlashcardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- Thanh Chọn Lọc (Tab Menu) ---
             _buildTabMenu(),
             const SizedBox(height: 20),
-            // --- Danh Sách Bộ Flashcard (Sử dụng Expanded + ListView.builder) ---
             Expanded(
               child: _buildFlashcardList(),
             ),
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddSet,
+        backgroundColor: Colors.blue.shade700,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
-  // --- WIDGET METHOD: AppBar ---
   PreferredSizeWidget _buildAppBar() {
+    // Nội dung không đổi
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -123,21 +112,19 @@ class _FlashcardPageState extends State<FlashcardPage> {
       automaticallyImplyLeading: false,
       title: Row(
         children: [
-          IconButton(onPressed: () {
-
-            // ✅ GỌI CALLBACK NỘI BỘ ĐỂ CHUYỂN VỀ HomePage (index 0)
-            if (widget.onBackToHome != null) {
-              widget.onBackToHome!();
-            } else {
-              // Chỉ dùng pop() làm fallback nếu nó được push lên như một Route
-              Navigator.of(context).pop();
-            }
-
-          },
+          IconButton(
+            onPressed: () {
+              if (widget.onBackToHome != null) {
+                widget.onBackToHome!();
+              } else {
+                // Chỉ dùng pop() làm fallback nếu nó được push lên như một Route
+                Navigator.of(context).pop();
+              }
+            },
             icon: Image.asset(AppIcons.imgBack, color: Colors.black),
           ),
-          Spacer(),
-          Column(
+          const Spacer(),
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -173,24 +160,41 @@ class _FlashcardPageState extends State<FlashcardPage> {
     );
   }
 
-  // --- WIDGET METHOD: Tab Menu ---
   Widget _buildTabMenu() {
+
+    final userId = _flashcardService.userId;
+
+    // Nội dung không đổi
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: <Widget>[
-          _buildTabButton('Tất cả', 5, Icons.grid_view_rounded),
-          _buildTabButton('Đánh dấu', 5, Icons.star_rounded),
+          _buildTabButton('Tất cả', _tabCounts['Tất cả'], Icons.grid_view_rounded),
+          // _buildTabButton('Đánh dấu', _tabCounts['Đánh dấu'], Icons.star_rounded),
+          // STREAM BUILDER CHO TAB 'ĐÁNH DẤU'
+          userId == null
+              ? _buildTabButton('Đánh dấu', 0, Icons.star_rounded) // Nếu chưa đăng nhập
+              : StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .collection('saved_sets')
+                .snapshots(),
+            builder: (context, snapshot) {
+              final count = snapshot.data?.docs.length ?? 0;
+              return _buildTabButton('Đánh dấu', count, Icons.star_rounded);
+            },
+          ),
           _buildTabButton('Theo chuyên đề', null, Icons.book_rounded),
           _buildTabButton('Cần luyện', null, Icons.local_fire_department_rounded),
-          _buildTabButton('Của tôi', null, Icons.person_rounded),
+          _buildTabButton('Của tôi', _tabCounts['Của tôi'], Icons.person_rounded),
         ],
       ),
     );
   }
 
-  // --- WIDGET METHOD: Nút Tab ---
   Widget _buildTabButton(String title, int? count, IconData icon) {
+    // Nội dung không đổi
     final bool isSelected = _selectedTab == title;
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
@@ -238,20 +242,122 @@ class _FlashcardPageState extends State<FlashcardPage> {
     );
   }
 
-  // --- WIDGET METHOD: Danh sách Card (Dùng ListView.builder) ---
   Widget _buildFlashcardList() {
-    return ListView.builder(
-      itemCount: sampleSets.length,
-      itemBuilder: (context, index) {
-        return FlashcardSetCard(
-          set: sampleSets[index],
+    // Logic lấy stream dựa trên tab không đổi
+    Stream<List<FlashcardSet>> stream;
+    final userId = _flashcardService.userId;
+
+    if (userId == null && (_selectedTab == 'Của tôi' || _selectedTab == 'Đánh dấu' || _selectedTab == 'Cần luyện')) {
+      stream = Stream.value([]);
+    } else if (_selectedTab == 'Tất cả') {
+      stream = _flashcardService.getFlashcardSets();
+    } else if (_selectedTab == 'Đánh dấu') {
+      stream = FirebaseFirestore.instance
+          .collection('users')
+          .doc(_flashcardService.userId)
+          .collection('saved_sets')
+          .snapshots()
+          .asyncMap((snapshot) async {
+        if (snapshot.docs.isEmpty) return [];
+
+        final setIds = snapshot.docs.map((e) => e.id).toList();
+
+        // Xử lý giới hạn 10 cho whereIn (giữ nguyên logic cũ)
+        if (setIds.isEmpty) return [];
+        final setsSnapshot = await FirebaseFirestore.instance
+            .collection('flashcard_sets')
+            .where(FieldPath.documentId, whereIn: setIds)
+            .get();
+
+        return setsSnapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())).toList();
+      });
+    } else if (_selectedTab == 'Của tôi') {
+      stream = _flashcardService.getSetsCreatedBy(userId!);
+    } else if (_selectedTab == 'Cần luyện') {
+      stream = _flashcardService.getFlashcardSets();
+    } else {
+      stream = _flashcardService.getFlashcardSets();
+    }
+
+    return StreamBuilder<List<FlashcardSet>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(
+            child: Text("Không tìm thấy bộ flashcard nào."),
+          );
+        }
+
+        List<FlashcardSet> sets = snapshot.data!;
+
+        if (_selectedTab == 'Cần luyện') {
+          // Hoặc sử dụng một Future/StreamBuilder wrapper ở đây:
+          return FutureBuilder<List<FlashcardSet>>(
+              future: _filterSetsForPractice(sets),
+              builder: (context, filteredSnapshot) {
+                if (filteredSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final filteredSets = filteredSnapshot.data ?? [];
+
+                if (filteredSets.isEmpty) {
+                  return const Center(child: Text("Bạn đã hoàn thành tất cả bộ đề!"));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredSets.length,
+                  itemBuilder: (context, index) {
+                    return FlashcardSetCard(set: filteredSets[index]);
+                  },
+                );
+              }
+          );
+        }
+
+        return ListView.builder(
+          itemCount: sets.length,
+          itemBuilder: (context, index) {
+            // Truyền bộ đề vào Card
+            return FlashcardSetCard(set: sets[index]);
+          },
         );
       },
     );
   }
+
+  // Hàm lọc set cần luyện (chạy trên client)
+  // Hàm lọc set cần luyện (chạy trên client)
+  Future<List<FlashcardSet>> _filterSetsForPractice(List<FlashcardSet> sets) async {
+    List<FlashcardSet> result = [];
+
+    // Kiểm tra userId ở đây để tránh gọi service nếu không cần thiết
+    if (_flashcardService.userId == null) {
+      // Nếu chưa đăng nhập, không có tiến độ cá nhân để lọc
+      return [];
+    }
+
+    for (var set in sets) {
+      // Gọi service để lấy tiến độ
+      final progress = await _flashcardService.getProgressOfSetFuture(set.id);
+
+      // 🔥 KHẮC PHỤC LỖI: Lấy giá trị an toàn và đảm bảo kiểu là int (hoặc dùng as int!)
+      // Sử dụng '?? 0' để xử lý null an toàn và đảm bảo kết quả là int
+      final int completed = progress['completed'] ?? 0;
+      final int total = progress['total'] ?? 0;
+
+      // So sánh an toàn: Cần luyện nếu đã hoàn thành < tổng số thẻ
+      if (completed < total) {
+        result.add(set);
+      }
+    }
+    return result;
+  }
 }
 
-// --- III. CARD WIDGET (flashcard_set_card.dart) ---
 class FlashcardSetCard extends StatelessWidget {
   final FlashcardSet set;
 
@@ -262,93 +368,142 @@ class FlashcardSetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double completionPercentage = set.totalCards > 0 ? set.completedCards / set.totalCards : 0.0;
-    final String percentText = (completionPercentage * 100).toStringAsFixed(0);
-    // Thay đổi màu progress dựa trên mức độ hoàn thành
-    Color progressColor = completionPercentage >= 0.9 ? Colors.green.shade700 : (completionPercentage >= 0.5 ? Colors.blue : Colors.redAccent);
+    final FlashcardService service = FlashcardService();
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FlashcardSetDetailPage(set: set),
+          ),// Truyền FlashcardSet qua argument
+        );
+      },
+      // Sử dụng StreamBuilder để lắng nghe tiến độ của User cho bộ đề này
+      child: StreamBuilder<Map<String, int>>(
+        stream: service.getProgressStreamOfSet(set.id),
+        builder: (context, snapshot) {
+          // Lấy dữ liệu tiến độ, nếu chưa có thì dùng giá trị mặc định (0)
+          final int totalCards = snapshot.data?['total'] ?? 0;
+          final int completedCards = snapshot.data?['completed'] ?? 0;
+          final int markedCards = snapshot.data?['marked'] ?? 0;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tiêu đề và Icon
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    set.title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+          // Tính toán dựa trên dữ liệu cá nhân
+          final double completionPercentage =
+          totalCards > 0 ? completedCards / totalCards : 0.0;
+          final String percentText = (completionPercentage * 100).toStringAsFixed(0);
+
+          Color progressColor = completionPercentage >= 0.9
+              ? Colors.green.shade700
+              : (completionPercentage >= 0.5 ? Colors.blue : Colors.redAccent);
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16.0),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Tiêu đề và Icon
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          set.title, // Lấy từ FlashcardSet chung
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.business_center_rounded,
+                        color: progressColor,
+                        size: 24,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    set.subtitle, // Lấy từ FlashcardSet chung
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
                     ),
                   ),
-                ),
-                Icon(
-                  Icons.business_center_rounded,
-                  color: progressColor,
-                  size: 24,
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              set.subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
+                  const SizedBox(height: 10),
+                  // Thông tin nhanh: Số thẻ, Độ khó, Thẻ đã đánh dấu
+                  Row(
+                    children: [
+                      Text('$totalCards thẻ', style: const TextStyle(fontWeight: FontWeight.w500)),
+                      const Text(' • ', style: TextStyle(color: Colors.grey)),
+                      Text(set.difficulty, style: const TextStyle(color: Colors.orange)),
+                      const Text(' • ', style: TextStyle(color: Colors.grey)),
+                      Icon(
+                        Icons.bookmark_rounded,
+                        size: 16,
+                        color: Colors.orange.shade700,
+                      ),
+                      Text(' $markedCards', style: const TextStyle(fontWeight: FontWeight.w500)),
+                      const Spacer(),
+
+                      // ✅ 2) StreamBuilder kiểm tra Saved/Favorite
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(service.userId)
+                            .collection('saved_sets')
+                            .doc(set.id)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          // Kiểm tra xem document tồn tại (đã lưu) hay không
+                          bool isSaved = snapshot.data?.exists == true;
+
+                          return IconButton(
+                            icon: Icon(
+                              isSaved ? Icons.favorite : Icons.favorite_border,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () => service.toggleSaveSet(set.id),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Thanh Tiến độ
+                  Row(
+                    children: [
+                      const Text('Tiến độ', style: TextStyle(color: Colors.grey)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: completionPercentage,
+                          backgroundColor: Colors.grey.shade300,
+                          valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                          minHeight: 8,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$completedCards/$totalCards ($percentText%)',
+                        style: TextStyle(
+                          color: progressColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            // Thông tin nhanh: Số thẻ, Độ khó, Thẻ đã đánh dấu
-            Row(
-              children: [
-                Text('${set.totalCards} thẻ', style: const TextStyle(fontWeight: FontWeight.w500)),
-                const Text(' • ', style: TextStyle(color: Colors.grey)),
-                Text(set.difficulty, style: const TextStyle(color: Colors.orange)),
-                const Text(' • ', style: TextStyle(color: Colors.grey)),
-                Icon(
-                  Icons.bookmark_rounded,
-                  size: 16,
-                  color: Colors.orange.shade700,
-                ),
-                Text(' ${set.markedCards}', style: const TextStyle(fontWeight: FontWeight.w500)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Thanh Tiến độ
-            Row(
-              children: [
-                const Text('Tiến độ', style: TextStyle(color: Colors.grey)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: completionPercentage,
-                    backgroundColor: Colors.grey.shade300,
-                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${set.completedCards}/${set.totalCards} ($percentText%)',
-                  style: TextStyle(
-                    color: progressColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

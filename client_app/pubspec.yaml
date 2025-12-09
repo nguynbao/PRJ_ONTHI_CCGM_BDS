@@ -48,6 +48,8 @@ dependencies:
   animations: ^2.1.1
   flutter_riverpod: ^3.0.3
   riverpod: ^3.0.3
+  flip_card: ^0.7.0
+  confetti: ^0.8.0
 
 
 dev_dependencies:

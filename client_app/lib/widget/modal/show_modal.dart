@@ -5,6 +5,7 @@ import 'package:client_app/views/main_screen/exam/total_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import '../../models/dictionary.model.dart';
 
 Future<void> showSuccessDialog(
   BuildContext context, {
@@ -530,6 +531,55 @@ Future<void> showExplanationModal(BuildContext ctx1, String explanation) async {
         ],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15)
+        ),
+      );
+    },
+  );
+}
+
+
+// Popup xem chi tiết 1 thuật ngữ
+void showTermDetailModal(BuildContext context, DictionaryTerm term) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              term.term,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              term.definition,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Đóng"),
+              ),
+            ),
+          ],
         ),
       );
     },
