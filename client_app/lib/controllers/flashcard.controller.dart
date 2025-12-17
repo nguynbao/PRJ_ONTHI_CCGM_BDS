@@ -12,15 +12,6 @@ class FlashcardService {
   // Lấy UID một cách an toàn (trả về null nếu chưa đăng nhập)
   String? get userId => currentUser?.uid;
 
-  Stream<List<FlashcardSet>> getFlashcardSets() {
-    return _db
-        .collection('flashcard_sets')
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => FlashcardSet.fromMap(doc.id, doc.data()))
-        .toList());
-  }
-
   Stream<List<FlashcardCard>> getCards(String setId) {
     return _db
         .collection('flashcards')
@@ -40,16 +31,22 @@ class FlashcardService {
       'title': set.title,
       'subtitle': set.subtitle,
       'difficulty': set.difficulty,
-      'creatorId': uid, // 🔥 LƯU USER ID TẠO
+      'creatorId': uid,
+      'isPublic': false,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return doc.id;
   }
 
   Future<void> addCard(String setId, FlashcardCard card) async {
+
+    final uid = userId; // Lấy ID người dùng hiện tại
+    if (uid == null) throw Exception("User not logged in");
+
     await _db.collection('flashcards').add({
       ...card.toMap(),
       'setId': setId,
+      'creatorId': uid,
     });
   }
 
@@ -214,13 +211,17 @@ class FlashcardService {
     };
   }
 
-// 1. Lấy tất cả sets (Future)
-  Future<List<FlashcardSet>> getFlashcardSetsFuture() async {
-    final snapshot = await _db.collection('flashcard_sets').get();
-    return snapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())).toList();
+  Stream<List<FlashcardSet>> getPublicFlashcardSets() {
+    return _db
+        .collection('flashcard_sets')
+        .where('isPublic', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => FlashcardSet.fromMap(doc.id, doc.data()))
+        .toList());
   }
 
-// 2. Lấy sets đã lưu (Future)
+  // Lấy sets đã lưu (Future)
   Future<List<FlashcardSet>> getSavedSetsFuture(String uid) async {
     final savedSnapshot = await _db.collection('users').doc(uid).collection('saved_sets').get();
     final setIds = savedSnapshot.docs.map((e) => e.id).toList();
@@ -230,12 +231,88 @@ class FlashcardService {
     return getSetsByIds(setIds);
   }
 
-// 3. Lấy sets do user tạo (Future)
+  // Lấy sets do user tạo (Future)
   Future<List<FlashcardSet>> getSetsCreatedByFuture(String uid) async {
     final snapshot = await _db
         .collection('flashcard_sets')
         .where('creatorId', isEqualTo: uid)
         .get();
     return snapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())).toList();
+  }
+
+  // Trong FlashcardService
+  Future<List<FlashcardSet>> getPublicFlashcardSetsFuture() async {
+    final snapshot = await _db
+        .collection('flashcard_sets')
+        .where('isPublic', isEqualTo: true)
+        .get();
+    return snapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())).toList();
+  }
+
+  Future<List<FlashcardSet>> getAllFlashcardSetsFuture() async {
+    final uid = userId;
+
+    final snapshot = await _db
+        .collection('flashcard_sets')
+        .where('isPublic', isEqualTo: true)
+        .get();
+
+    List<FlashcardSet> publicSets =
+    snapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())).toList();
+
+    if (uid != null) {
+      final mySnapshot = await _db
+          .collection('flashcard_sets')
+          .where('creatorId', isEqualTo: uid)
+          .get();
+
+      publicSets.addAll(
+          mySnapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())));
+    }
+
+    return publicSets;
+  }
+
+  // Trong FlashcardService
+  Stream<List<FlashcardSet>> getAllFlashcardSetsStream() {
+    final uid = userId;
+
+    // 1. Tạo Stream cho các bộ Công khai
+    final publicStream = _db
+        .collection('flashcard_sets')
+        .where('isPublic', isEqualTo: true)
+        .snapshots();
+
+    if (uid == null) {
+      // Nếu chưa đăng nhập, chỉ trả về Stream của bộ Công khai
+      return publicStream.map((snapshot) => snapshot.docs
+          .map((doc) => FlashcardSet.fromMap(doc.id, doc.data()))
+          .toList());
+    }
+
+    // 2. Tạo Stream cho các bộ Của tôi
+    final mySetsStream = _db
+        .collection('flashcard_sets')
+        .where('creatorId', isEqualTo: uid)
+        .snapshots();
+
+    // 3. Kết hợp hai Stream và xử lý trùng lặp
+    return publicStream.asyncMap((publicSnapshot) async {
+      // Lấy dữ liệu mới nhất từ Stream các bộ của tôi (chỉ lấy 1 lần)
+      final mySetsSnapshot = await mySetsStream.first;
+
+      // Dùng Set để hợp nhất và loại bỏ trùng lặp
+      Set<FlashcardSet> uniqueSets = {};
+
+      // Thêm bộ Công khai
+      uniqueSets.addAll(
+          publicSnapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())));
+
+      // Thêm bộ Của tôi (sẽ ghi đè/bỏ qua nếu trùng ID)
+      uniqueSets.addAll(
+          mySetsSnapshot.docs.map((doc) => FlashcardSet.fromMap(doc.id, doc.data())));
+
+      return uniqueSets.toList();
+    });
   }
 }

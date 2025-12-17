@@ -4,8 +4,9 @@ import 'package:client_app/views/main_screen/exam/review_exam_page.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/exam.controller.dart';
 
-class TotalExamPage extends StatelessWidget {
+class TotalExamPage extends StatefulWidget { // 🔥 Chuyển thành StatefulWidget
   final String courseId;
   final String examId;
   final String examName;
@@ -27,6 +28,44 @@ class TotalExamPage extends StatelessWidget {
     required this.userAnswers,
   });
 
+  @override
+  State<TotalExamPage> createState() => _TotalExamPageState();
+}
+
+class _TotalExamPageState extends State<TotalExamPage> { // 🔥 State Class
+
+  final ExamController _examController = ExamController();
+
+  @override
+  void initState() {
+    super.initState();
+    // 🔥 KÍCH HOẠT LƯU TRỮ NGAY LẬP TỨC KHI TRANG TẢI
+    _saveResults();
+  }
+
+  void _saveResults() async {
+    final int totalQuestions = widget.totalQuestions;
+    final int correctAnswers = widget.correctAnswers;
+    final int timeSpentSeconds = widget.timeSpentSeconds;
+
+    final double percentage = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+    final int score = percentage.round();
+
+    try {
+      await _examController.saveExamResult(
+        examId: widget.examId,
+        score: score,
+        correctCount: correctAnswers,
+        totalQuestions: totalQuestions,
+        timeTakenSeconds: timeSpentSeconds,
+      );
+      print("Lưu kết quả bài thi thành công vào Firestore!");
+    } catch (e) {
+      // Thường xảy ra nếu người dùng chưa đăng nhập
+      print("LỖI: Không thể lưu kết quả bài thi: $e");
+    }
+  }
+
   String _formatTime(int totalSeconds) {
     final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
@@ -35,31 +74,21 @@ class TotalExamPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tính toán điểm số và câu trả lời
+    // Dữ liệu lấy từ widget (Giờ là widget.totalQuestions, widget.correctAnswers,...)
+    final int totalQuestions = widget.totalQuestions;
+    final int correctAnswers = widget.correctAnswers;
     final int wrongAnswers = totalQuestions - correctAnswers;
     final double percentage = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
 
     return Scaffold(
       backgroundColor: const Color(0xffD9D9D9),
       appBar: AppBar(
-        toolbarHeight: 80,
-        automaticallyImplyLeading: false,
+        // ... (Giữ nguyên AppBar)
         title: Row(
           children: [
-            IconButton(
-              onPressed: () => {
-                // Quay về MainScreen
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MainScreen()),
-                      (Route<dynamic> route) => false,
-                ),
-              },
-              icon: Image.asset(AppIcons.imgBack),
-            ),
             const Spacer(),
             Text(
-              examName,
+              widget.examName, // Dùng widget.examName
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -81,7 +110,7 @@ class TotalExamPage extends StatelessWidget {
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 30, 30, 10), // Sửa lỗi Padding
+                  padding: EdgeInsets.fromLTRB(30, 30, 30, 10),
                   child: Column(
                     children: [
                       Row(
@@ -95,7 +124,7 @@ class TotalExamPage extends StatelessWidget {
                           ),
                           box(
                             AppIcons.imgTime,
-                            _formatTime(timeSpentSeconds),
+                            _formatTime(widget.timeSpentSeconds), // Dùng widget.timeSpentSeconds
                             'Thời gian',
                             AppColor.buttomThirdCol,
                           ),
@@ -123,19 +152,19 @@ class TotalExamPage extends StatelessWidget {
                             item(
                               AppIcons.imgLich,
                               'Ngày hoàn thành',
-                              '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}', // ✅ DÙNG NGÀY HIỆN TẠI
+                              '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
                               AppColor.buttonprimaryCol,
                             ),
                             item(
                               AppIcons.imgLich,
                               'Số câu đúng',
-                              '$correctAnswers/$totalQuestions', // ✅ DÙNG DỮ LIỆU THẬT
+                              '$correctAnswers/$totalQuestions',
                               Colors.green.shade400,
                             ),
                             item(
                               AppIcons.imgLich,
                               'Số câu sai',
-                              '$wrongAnswers/$totalQuestions', // ✅ DÙNG DỮ LIỆU THẬT
+                              '$wrongAnswers/$totalQuestions',
                               Colors.red.shade400,
                             ),
                             SizedBox(height: 15.h),
@@ -143,7 +172,7 @@ class TotalExamPage extends StatelessWidget {
                             item(
                               AppIcons.imgStar,
                               'Đánh giá',
-                              percentage >= 80 ? 'Hoàn thành Tốt' : 'Cần cải thiện', // ✅ DÙNG TỶ LỆ THẬT
+                              percentage >= 80 ? 'Hoàn thành Tốt' : 'Cần cải thiện',
                               AppColor.buttomThirdCol,
                             ),
                           ],
@@ -163,12 +192,13 @@ class TotalExamPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (_) => ReviewExamPage(
-                          courseId: courseId,
-                          examId: examId,
-                          userAnswers: userAnswers,
+                          courseId: widget.courseId,
+                          examId: widget.examId,
+                          userAnswers: widget.userAnswers,
                         )
                     )
                 ),
+                // ... (Phần nút giữ nguyên)
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColor.buttonprimaryCol,
                   shape: RoundedRectangleBorder(

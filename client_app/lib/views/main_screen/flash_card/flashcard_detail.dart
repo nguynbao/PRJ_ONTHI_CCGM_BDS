@@ -4,6 +4,7 @@ import 'package:client_app/models/flashcard_set.model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class FlashcardSetDetailPage extends StatefulWidget {
   final FlashcardSet set;
@@ -37,29 +38,45 @@ class _FlashcardSetDetailPageState extends State<FlashcardSetDetailPage> {
   /// Stream chung: Cards + Progress gộp lại
   Stream<Map<String, dynamic>> _combinedStream() {
     final cardsStream = _flashcardService.getCards(widget.set.id);
+    final userId = _flashcardService.userId;
+
+    if (userId == null) {
+      return cardsStream.map((cards) => {
+        'cards': cards,
+        'progress': <String, dynamic>{}
+      });
+    }
+
     final progressStream = FirebaseFirestore.instance
         .collection('users')
-        .doc(_flashcardService.userId)
+        .doc(userId)
         .collection('progress')
         .snapshots();
 
-    return cardsStream.asyncMap((cardList) async {
-      final progressSnap = await progressStream.first;
+    return Rx.combineLatest2(
+      cardsStream,
+      progressStream,
+          (cards, progressSnapshot) {
+            final progressMap = {
+              for (var doc in progressSnapshot.docs)
+                doc.id: {
+                  'isCompleted': (doc.data() as Map<String, dynamic>).containsKey('isCompleted')
+                      ? doc['isCompleted']
+                      : false,
+                  'isMarked': (doc.data() as Map<String, dynamic>).containsKey('isMarked')
+                      ? doc['isMarked']
+                      : false,
+                }
+            };
 
-      final progressMap = {
-        for (var doc in progressSnap.docs)
-          doc.id: {
-            'isCompleted': doc['isCompleted'] ?? false,
-            'isMarked': doc['isMarked'] ?? false,
-          }
-      };
-
-      return {
-        'cards': cardList,
-        'progress': progressMap,
-      };
-    });
+            return {
+          'cards': cards,
+          'progress': progressMap,
+        };
+      },
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +89,22 @@ class _FlashcardSetDetailPageState extends State<FlashcardSetDetailPage> {
       body: StreamBuilder<Map<String, dynamic>>(
         stream: _combinedStream(),
         builder: (context, snapshot) {
+          // print("=== 🔍 STREAM UPDATE 🔍 ===");
+          //
+          // print("hasData: ${snapshot.hasData}");
+          // print("hasError: ${snapshot.hasError}");
+          // print("connectionState: ${snapshot.connectionState}");
+          //
+          // if (snapshot.hasError) {
+          //   print("🔥 ERROR: ${snapshot.error}");
+          // }
+          //
+          // if (!snapshot.hasData) {
+          //   print("⏳ Chưa có data – đang đợi stream...");
+          //   return const Center(
+          //     child: CircularProgressIndicator(),
+          //   );
+          // }
           if (!snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(),

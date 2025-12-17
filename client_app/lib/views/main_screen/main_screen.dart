@@ -1,6 +1,6 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
-import 'package:client_app/views/main_screen/flash_card/flash_card_page.dart';
+import 'package:client_app/views/main_screen/home/examhistorypage.dart';
 import 'package:client_app/views/main_screen/home/home_container.dart';
 import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
@@ -44,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
     // const HomeContainer(key: PageStorageKey('HomePage')),
     const MyCoursesPage(key: PageStorageKey('MyCoursesPage')),
     const ExamPage(key: PageStorageKey('ExamPage')),
-    const CardPage(key: PageStorageKey('FlashCardPage')),
+    ExamHistoryPage(key: PageStorageKey('FlashCardPage'), examId: '', examName: '',),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
   ];
 
@@ -53,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
     _TabInfo(title: 'Trang chủ', svgPath: AppVector.iconHome),
     _TabInfo(title: 'Bài học', svgPath: AppVector.iconCourses),
     _TabInfo(title: 'Kiểm tra', svgPath: AppVector.iconExam),
-    _TabInfo(title: 'Ghi nhớ', svgPath: AppVector.icon),
+    _TabInfo(title: 'Lịch sử', svgPath: AppVector.icon),
     _TabInfo(title: 'Tài khoản', svgPath: AppVector.iconProfile),
   ];
 

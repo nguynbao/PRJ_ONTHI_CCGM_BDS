@@ -89,7 +89,7 @@ class _DetailExamPageState extends State<DetailExamPage> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 30, 30, 10),
+                      padding: const EdgeInsets.fromLTRB(30, 20, 30, 10),
                       child: Column(
                         children: [
                           Row(
@@ -109,7 +109,7 @@ class _DetailExamPageState extends State<DetailExamPage> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 30),
+                          SizedBox(height: 20),
                           Container(
                             height: 300,
                             width: double.infinity,
@@ -149,7 +149,7 @@ class _DetailExamPageState extends State<DetailExamPage> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 40),
+                          SizedBox(height: 20),
                           Container(
                             width: double.infinity,
                             decoration: BoxDecoration(

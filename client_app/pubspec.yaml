@@ -50,6 +50,7 @@ dependencies:
   riverpod: ^3.0.3
   flip_card: ^0.7.0
   confetti: ^0.8.0
+  rxdart: ^0.28.0
 
 
 dev_dependencies:

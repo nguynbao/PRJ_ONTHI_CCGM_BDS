@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // Biến trạng thái
   int _selectedTopicIndex =
-      0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
+  0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
   String _displayName = ''; // Tên người dùng hiển thị
   bool _loading = true; // Cờ trạng thái tải dữ liệu
 
@@ -107,16 +107,25 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         SizedBox(width: 20.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(color: Colors.black)),
-            SizedBox(height: 10.h),
-            Text(
-              'Hôm nay bạn muốn học gì?',
-              style: TextStyle(fontSize: 13.sp, color: Colors.black45),
-            ),
-          ],
+        Expanded( // ✅ Thêm Expanded để tránh overflow ngang
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(color: Colors.black),
+                maxLines: 1, // ✅ Giới hạn dòng
+                overflow: TextOverflow.ellipsis, // ✅ Thêm ellipsis nếu quá dài
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Hôm nay bạn muốn học gì?',
+                style: TextStyle(fontSize: 13.sp, color: Colors.black45),
+                maxLines: 1, // ✅ Giới hạn dòng
+                overflow: TextOverflow.ellipsis, // ✅ Thêm ellipsis nếu quá dài
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -158,7 +167,7 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 28,
+          height: 40.h, // ✅ Tăng height từ 28 lên 40 để phù hợp với minimumSize và tránh overflow
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _danhSachKhoaHoc.length,
@@ -182,12 +191,15 @@ class _HomePageState extends State<HomePage> {
                       : Colors.grey,
                 ),
                 child: Center(
-                  child: Text(
-                    course.name,
-                    style: TextStyle(
-                      color: selected ? AppColor.buttomSecondCol : Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                  child: Flexible( // ✅ Thêm Flexible để text có thể wrap hoặc ellipsis
+                    child: Text(
+                      course.name,
+                      style: TextStyle(
+                        color: selected ? AppColor.buttomSecondCol : Colors.grey,
+                        fontSize: 15.sp, // ✅ Sử dụng .sp để scale theo screen
+                      ),
+                      maxLines: 1, // ✅ Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                     ),
                   ),
                 ),
@@ -245,7 +257,7 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 28,
+          height: 40.h, // ✅ Tăng height từ 28 lên 40 để phù hợp với minimumSize và tránh overflow
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: tenChuDeDuyNhat.length, // ✅ Dùng danh sách tên DUY NHẤT
@@ -264,12 +276,15 @@ class _HomePageState extends State<HomePage> {
                       : Colors.grey,
                 ),
                 child: Center(
-                  child: Text(
-                    topicName, // Hiển thị tên Topic
-                    style: TextStyle(
-                      color: selected ? AppColor.buttomSecondCol : Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                  child: Flexible( // ✅ Thêm Flexible để text có thể wrap hoặc ellipsis
+                    child: Text(
+                      topicName, // Hiển thị tên Topic
+                      style: TextStyle(
+                        color: selected ? AppColor.buttomSecondCol : Colors.grey,
+                        fontSize: 15.sp, // ✅ Sử dụng .sp để scale theo screen
+                      ),
+                      maxLines: 1, // ✅ Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                     ),
                   ),
                 ),
@@ -322,9 +337,16 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            courseName,
-                            style: TextStyle(color: AppColor.buttomThirdCol),
+                          Flexible( // ✅ Thêm Flexible để tránh overflow trong Row
+                            child: Text(
+                              courseName,
+                              style: TextStyle(
+                                color: AppColor.buttomThirdCol,
+                                fontSize: 14.sp, // ✅ Sử dụng .sp và giảm nhẹ nếu cần
+                              ),
+                              maxLines: 1, // ✅ Giới hạn dòng
+                              overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
+                            ),
                           ),
                           const Spacer(),
                           IconButton(
@@ -341,9 +363,16 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      Text(
-                        topicName,
-                        style: const TextStyle(color: Colors.black),
+                      Flexible( // ✅ Thêm Flexible để text có thể thu nhỏ nếu cần
+                        child: Text(
+                          topicName,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.sp, // ✅ Sử dụng .sp
+                          ),
+                          maxLines: 2, // ✅ Cho phép 2 dòng để linh hoạt hơn
+                          overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
+                        ),
                       ),
                     ],
                   ),
@@ -386,21 +415,29 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Khóa học ưu đãi hôm nay!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w300,
+              Flexible( // ✅ Thêm Flexible cho text dài
+                child: Text(
+                  'Khóa học ưu đãi hôm nay!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w300,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(height: 8.h),
-              Text(
-                'Flutter Developer Pro\nGiảm 50%',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
+              Flexible( // ✅ Thêm Flexible cho text dài
+                child: Text(
+                  'Flutter Developer Pro\nGiảm 50%',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const Spacer(),
@@ -445,8 +482,8 @@ class _HomePageState extends State<HomePage> {
 
     // 3. Xác định Tên Chủ đề đang được chọn (dựa trên index của danh sách TÊN DUY NHẤT)
     final String tenChuDeDuocChon =
-        tenChuDeDuyNhat.isNotEmpty &&
-            _selectedTopicIndex < tenChuDeDuyNhat.length
+    tenChuDeDuyNhat.isNotEmpty &&
+        _selectedTopicIndex < tenChuDeDuyNhat.length
         ? tenChuDeDuyNhat[_selectedTopicIndex]
         : '';
 
@@ -500,21 +537,12 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Nội dung Chủ đề "${tenChuDeDuocChon}"',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
                         SizedBox(
                           height: 250.h,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount:
-                                chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
+                            chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
                             separatorBuilder: (context, index) =>
                                 SizedBox(width: 20.w),
                             itemBuilder: (context, index) {
@@ -523,9 +551,10 @@ class _HomePageState extends State<HomePage> {
                               return _buildCourseCard(
                                 courseName: currentCourseName,
                                 topicName:
-                                    topicDaLoc.name, // Lấy tên từ Topic đã lọc
+                                topicDaLoc.name, // Lấy tên từ Topic đã lọc
                                 onTap: () {
-                                  final course = _danhSachKhoaHoc[index];
+                                  // ✅ SỬA LỖI: Sử dụng _selectedCourseIndex thay vì index
+                                  final course = _danhSachKhoaHoc[_selectedCourseIndex];
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) => TopicDetailPage(

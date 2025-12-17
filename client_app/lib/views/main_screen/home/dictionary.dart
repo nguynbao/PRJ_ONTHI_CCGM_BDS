@@ -38,8 +38,6 @@ class _DictionaryPageState extends State<DictionaryPage> {
     showTermDetailModal(context, term);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
 

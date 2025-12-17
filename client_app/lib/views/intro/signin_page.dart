@@ -3,10 +3,13 @@ import 'package:client_app/common/app_button.dart';
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/auth.controller.dart';
+import 'package:client_app/views/intro/forgot_password_email_page.dart';
 import 'package:client_app/views/intro/signup_page.dart'; 
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+
+import 'forgot_password_page.dart';
 
 class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
@@ -155,7 +158,9 @@ class _SigninPageState extends State<SigninPage> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // TODO: Forgot password flow
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const ForgotPasswordEmailPage()),
+                            );
                           },
                           child: const Text(
                             'Forgot Password?',

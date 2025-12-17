@@ -1,17 +1,75 @@
 import 'package:client_app/models/exam.model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../models/exam_history.model.dart';
 
 class ExamController {
   final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
 
-  ExamController({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+  ExamController({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _db = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
+
+  // 🔥 Lấy User ID hiện tại một cách an toàn
+  String? get currentUserId => _auth.currentUser?.uid;
 
   CollectionReference<Map<String, dynamic>> get _coursesCol =>
       _db.collection('courses');
 
+  // 🔥 Bộ sưu tập mới để lưu lịch sử làm bài
+  CollectionReference<Map<String, dynamic>> get _historyCol =>
+      _db.collection('exam_history');
+
   CollectionReference<Map<String, dynamic>> _getExamsCol(String courseId) {
     return _coursesCol.doc(courseId).collection('exams');
+  }
+
+  // --- HÀM MỚI: LƯU KẾT QUẢ BÀI LÀM ---
+  Future<void> saveExamResult({
+    required String examId,
+    required int score,
+    required int correctCount,
+    required int totalQuestions,
+    required int timeTakenSeconds,
+  }) async {
+    final uid = currentUserId;
+    if (uid == null) {
+      throw Exception("User not logged in. Cannot save exam results.");
+    }
+
+    // 🔥 Cần đảm bảo ExamHistory model đã có hàm toMap() như ví dụ trước
+    final Map<String, dynamic> resultData = {
+      'userId': uid,
+      'examId': examId,
+      'score': score,
+      'correctCount': correctCount,
+      'totalQuestions': totalQuestions,
+      'timeTakenSeconds': timeTakenSeconds,
+      'submissionTime': FieldValue.serverTimestamp(), // Dùng thời gian máy chủ
+    };
+
+    await _historyCol.add(resultData);
+    print("Kết quả bài thi cho user $uid, exam $examId đã được lưu.");
+  }
+
+  // --- HÀM MỚI: LẤY LỊCH SỬ BÀI LÀM CỦA MỘT USER CHO MỘT BÀI THI CỤ THỂ (Dạng Stream) ---
+  Stream<List<ExamHistory>> getExamHistoryStream({required String examId}) {
+    final uid = currentUserId;
+    if (uid == null) {
+      return Stream.value([]);
+    }
+
+    // Truy vấn lịch sử theo UID và Exam ID
+    return _historyCol
+        .where('userId', isEqualTo: uid)
+        .where('examId', isEqualTo: examId)
+        .orderBy('submissionTime', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => ExamHistory.fromMap(doc.id, doc.data()!)) // Cần đảm bảo ExamHistory.fromMap đã có
+        .toList());
   }
 
   Future<Map<String, dynamic>?> getExamQuestions({

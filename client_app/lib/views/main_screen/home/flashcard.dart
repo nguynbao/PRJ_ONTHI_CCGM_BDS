@@ -26,8 +26,12 @@ class _FlashcardPageState extends State<FlashcardPage> {
   @override
   void initState() {
     super.initState();
-    _loadTabCounts(); // Gọi hàm tải số liệu
+
+    Future.delayed(Duration(milliseconds: 200), () {
+      _loadTabCounts();
+    });
   }
+
 
   // Hàm điều hướng đến trang tạo bộ đề mới
   void _navigateToAddSet() {
@@ -46,7 +50,7 @@ class _FlashcardPageState extends State<FlashcardPage> {
     final userId = _flashcardService.userId;
     if (userId == null) {
       // Nếu chưa đăng nhập, chỉ tính tab 'Tất cả'
-      final allSets = await _flashcardService.getFlashcardSetsFuture(); // Cần tạo hàm Future này
+      final allSets = await _flashcardService.getAllFlashcardSetsFuture(); // Cần tạo hàm Future này
       setState(() {
         _tabCounts['Tất cả'] = allSets.length;
       });
@@ -54,7 +58,7 @@ class _FlashcardPageState extends State<FlashcardPage> {
     }
 
     // Lấy dữ liệu cho các tab cá nhân
-    final allSetsFuture = _flashcardService.getFlashcardSetsFuture();
+    final allSetsFuture = _flashcardService.getAllFlashcardSetsFuture();
     final savedSetsFuture = _flashcardService.getSavedSetsFuture(userId); // Cần tạo hàm Future này
     final mySetsFuture = _flashcardService.getSetsCreatedByFuture(userId); // Cần tạo hàm Future này
 
@@ -170,8 +174,6 @@ class _FlashcardPageState extends State<FlashcardPage> {
       child: Row(
         children: <Widget>[
           _buildTabButton('Tất cả', _tabCounts['Tất cả'], Icons.grid_view_rounded),
-          // _buildTabButton('Đánh dấu', _tabCounts['Đánh dấu'], Icons.star_rounded),
-          // STREAM BUILDER CHO TAB 'ĐÁNH DẤU'
           userId == null
               ? _buildTabButton('Đánh dấu', 0, Icons.star_rounded) // Nếu chưa đăng nhập
               : StreamBuilder<QuerySnapshot>(
@@ -250,7 +252,7 @@ class _FlashcardPageState extends State<FlashcardPage> {
     if (userId == null && (_selectedTab == 'Của tôi' || _selectedTab == 'Đánh dấu' || _selectedTab == 'Cần luyện')) {
       stream = Stream.value([]);
     } else if (_selectedTab == 'Tất cả') {
-      stream = _flashcardService.getFlashcardSets();
+      stream = _flashcardService.getAllFlashcardSetsStream();
     } else if (_selectedTab == 'Đánh dấu') {
       stream = FirebaseFirestore.instance
           .collection('users')
@@ -274,9 +276,9 @@ class _FlashcardPageState extends State<FlashcardPage> {
     } else if (_selectedTab == 'Của tôi') {
       stream = _flashcardService.getSetsCreatedBy(userId!);
     } else if (_selectedTab == 'Cần luyện') {
-      stream = _flashcardService.getFlashcardSets();
+      stream = _flashcardService.getPublicFlashcardSets();
     } else {
-      stream = _flashcardService.getFlashcardSets();
+      stream = _flashcardService.getPublicFlashcardSets();
     }
 
     return StreamBuilder<List<FlashcardSet>>(
@@ -329,7 +331,30 @@ class _FlashcardPageState extends State<FlashcardPage> {
     );
   }
 
-  // Hàm lọc set cần luyện (chạy trên client)
+  // Code chạy một lần để cập nhật tất cả sets cũ
+  Future<void> migrateLegacySetsToPublic() async {
+    final setsRef = FirebaseFirestore.instance.collection('flashcard_sets');
+
+    // Lấy tất cả các sets mà thiếu trường isPublic
+    final querySnapshot = await setsRef
+        .where('isPublic', isNull: true) // Truy vấn những tài liệu thiếu trường isPublic
+        .limit(500) // Nên giới hạn số lượng trong mỗi lần chạy
+        .get();
+
+    final batch = FirebaseFirestore.instance.batch();
+
+    for (var doc in querySnapshot.docs) {
+      batch.update(doc.reference, {
+        'isPublic': true, // Mặc định là công khai
+        // Có thể thêm một creatorId giả nếu bạn cần sau này
+        // 'creatorId': 'LEGACY_USER',
+      });
+    }
+
+    await batch.commit();
+    print('Đã cập nhật ${querySnapshot.size} bộ đề cũ thành công khai.');
+  }
+
   // Hàm lọc set cần luyện (chạy trên client)
   Future<List<FlashcardSet>> _filterSetsForPractice(List<FlashcardSet> sets) async {
     List<FlashcardSet> result = [];
