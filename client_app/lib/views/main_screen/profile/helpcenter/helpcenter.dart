@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../config/themes/app_color.dart';
 
 class HelpCenterPage extends StatelessWidget {
   const HelpCenterPage({super.key});
@@ -13,18 +14,16 @@ class HelpCenterPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AppColor.textpriCol,
           ),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
-        foregroundColor: Colors.black,
+        foregroundColor: AppColor.textpriCol,
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: Colors.grey.shade600),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -34,21 +33,15 @@ class HelpCenterPage extends StatelessWidget {
             padding: EdgeInsets.all(16.w),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Welcome Section
                 _buildWelcomeCard(),
                 SizedBox(height: 24.h),
-
-                // FAQ Section
                 _buildSectionHeader("Câu hỏi thường gặp"),
                 SizedBox(height: 16.h),
                 _buildFaqList(),
                 SizedBox(height: 32.h),
-
-                // Contact Section
                 _buildSectionHeader("Thông tin Liên hệ"),
                 SizedBox(height: 16.h),
                 _buildContactCard(),
-
                 SizedBox(height: 24.h),
               ]),
             ),
@@ -71,7 +64,7 @@ class HelpCenterPage extends StatelessWidget {
               children: [
                 Icon(
                   Icons.help_outline,
-                  color: const Color(0xFF667EEA),
+                  color: AppColor.primaryBlue,
                   size: 28.sp,
                 ),
                 SizedBox(width: 12.w),
@@ -81,7 +74,7 @@ class HelpCenterPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF667EEA),
+                      color: AppColor.primaryBlue,
                     ),
                   ),
                 ),
@@ -109,7 +102,7 @@ class HelpCenterPage extends StatelessWidget {
           width: 4.w,
           height: 20.h,
           decoration: BoxDecoration(
-            color: const Color(0xFF667EEA),
+            color: AppColor.primaryBlue,
             borderRadius: BorderRadius.circular(2.r),
           ),
         ),
@@ -119,7 +112,7 @@ class HelpCenterPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColor.textpriCol,
           ),
         ),
       ],
@@ -130,15 +123,15 @@ class HelpCenterPage extends StatelessWidget {
     final faqs = [
       {
         "title": "Làm thế nào để tải tài liệu ôn thi về máy?",
-        "content": "Hiện tại, ứng dụng chỉ cho phép ôn tập trực tuyến để đảm bảo tính cập nhật của nội dung. Bạn cần kết nối Internet để sử dụng.",
+        "content": "Hiện tại, ứng dụng chỉ cho phép ôn tập trực tuyến để đảm bảo tính cập nhật của nội dung.",
       },
       {
-        "title": "Nội dung ôn thi có được cập nhật theo luật mới không?",
-        "content": "Có. Đội ngũ chúng tôi liên tục theo dõi các thay đổi trong Luật Kinh doanh Bất động sản và các quy định liên quan để cập nhật nội dung nhanh nhất có thể.",
+        "title": "Nội dung ôn thi có được cập nhật không?",
+        "content": "Có. Đội ngũ chúng tôi liên tục theo dõi các thay đổi trong Luật Kinh doanh Bất động sản mới nhất.",
       },
       {
         "title": "Tôi quên mật khẩu, phải làm sao?",
-        "content": "Vui lòng sử dụng tính năng 'Quên mật khẩu' trên màn hình đăng nhập hoặc vào mục 'Chỉnh sửa tài khoản' để đặt lại mật khẩu của bạn.",
+        "content": "Vui lòng sử dụng tính năng 'Quên mật khẩu' trên màn hình đăng nhập.",
       },
     ];
 
@@ -156,12 +149,17 @@ class HelpCenterPage extends StatelessWidget {
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Theme(
-        data: ThemeData(dividerColor: Colors.transparent),
+        // Cấu hình Theme tại đây để xóa hiệu ứng xám khi click (InkWell effect)
+        data: ThemeData(
+          dividerColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
         child: ExpansionTile(
           tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
           leading: Icon(
             Icons.question_mark_outlined,
-            color: const Color(0xFF667EEA),
+            color: AppColor.primaryBlue,
             size: 24.sp,
           ),
           title: Text(
@@ -169,10 +167,10 @@ class HelpCenterPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColor.textpriCol,
             ),
           ),
-          iconColor: const Color(0xFF667EEA),
+          iconColor: AppColor.primaryBlue,
           collapsedIconColor: Colors.grey.shade600,
           children: [
             Container(
@@ -237,10 +235,10 @@ class HelpCenterPage extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: const Color(0xFF667EEA).withOpacity(0.1),
+            color: AppColor.primaryBlue.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Icon(icon, color: const Color(0xFF667EEA), size: 24.sp),
+          child: Icon(icon, color: AppColor.primaryBlue, size: 24.sp),
         ),
         SizedBox(width: 16.w),
         Expanded(
@@ -252,21 +250,19 @@ class HelpCenterPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: AppColor.textpriCol,
                 ),
               ),
               SizedBox(height: 4.h),
               GestureDetector(
-                onTap: () {
-                  // TODO: Implement tap actions (e.g., launch email or call)
-                },
+                onTap: () {},
                 child: Text(
                   value,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    color: const Color(0xFF667EEA),
+                    color: AppColor.primaryBlue,
                     fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
+                    decoration: TextDecoration.none, // Bỏ gạch chân
                   ),
                 ),
               ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
@@ -5,7 +7,12 @@ import 'package:client_app/views/main_screen/exam/total_exam_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 import '../../models/dictionary.model.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+
+import '../youtube_video_section.dart';
 
 Future<void> showSuccessDialog(
   BuildContext context, {
@@ -495,7 +502,7 @@ Future<void> showSuccessModalExam(
                   style: TextStyle(color: AppColor.buttonprimaryCol),
                 ),
               ),
-            ],
+            ]
           ),
         ),
       );
@@ -505,38 +512,74 @@ Future<void> showSuccessModalExam(
   print("Dialog đã đóng xong.");
 }
 
-Future<void> showExplanationModal(BuildContext ctx1, String explanation) async {
+Future<void> showExplanationModal(
+    BuildContext context,
+    String explanation, {
+      String? youtubeUrl,
+    }) async {
   await showDialog(
-    context: ctx1,
-    builder: (ctx1) {
+    context: context,
+    useRootNavigator: true,
+    builder: (ctx) {
       return AlertDialog(
         title: const Text(
           "Giải thích đáp án",
           style: TextStyle(
-            color: AppColor.buttonprimaryCol, fontWeight: FontWeight.bold
+            color: AppColor.buttonprimaryCol,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        content: Container(
-          height: MediaQuery.of(ctx1).size.height * 0.4,
-          width: MediaQuery.of(ctx1).size.width * 0.6,
+        content: SizedBox(
+          width: MediaQuery.of(ctx).size.width * 0.9,
           child: SingleChildScrollView(
-            child: Text(explanation),
+            physics: const BouncingScrollPhysics(), // Cuộn mượt kiểu iOS
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (youtubeUrl != null && youtubeUrl.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: YoutubeVideoSection(
+                      key: const ValueKey('youtube-player'),
+                      videoUrl: youtubeUrl,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                const Text(
+                  "Nội dung giải thích:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  explanation,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.6,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx1),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text("Đóng"),
           ),
         ],
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15)
+          borderRadius: BorderRadius.circular(16),
         ),
       );
     },
   );
 }
-
 
 // Popup xem chi tiết 1 thuật ngữ
 void showTermDetailModal(BuildContext context, DictionaryTerm term) {
@@ -584,4 +627,177 @@ void showTermDetailModal(BuildContext context, DictionaryTerm term) {
       );
     },
   );
+}
+
+Future<void> openTikTok(String url) async {
+  try {
+    final uri = Uri.parse(url);
+
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  } catch (e) {
+    debugPrint('Không mở được TikTok: $e');
+  }
+}
+
+// --- Quảng cáo Full Màn Hình (Interstitials Style) ---
+void showTikTokAd(
+    BuildContext context,
+    String videoMp4Url,
+    String tiktokOpenUrl,
+    VoidCallback onClosed,
+    ) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (_, __, ___) {
+      return _FullPageAdContent(
+        videoMp4Url: videoMp4Url,
+        tiktokUrl: tiktokOpenUrl,
+        onClosed: onClosed,
+      );
+    },
+  );
+}
+
+
+// Widget quản lý logic đếm ngược và UI Full Screen
+class _FullPageAdContent extends StatefulWidget {
+  final String videoMp4Url;
+  final String tiktokUrl;
+  final VoidCallback onClosed;
+
+  const _FullPageAdContent({
+    required this.videoMp4Url,
+    required this.tiktokUrl,
+    required this.onClosed
+  });
+
+  @override
+  State<_FullPageAdContent> createState() => _FullPageAdContentState();
+}
+
+class _FullPageAdContentState extends State<_FullPageAdContent> {
+  int _secondsLeft = 5;
+  Timer? _timer;
+  VideoPlayerController? _videoController;
+
+
+  @override
+  void initState() {
+    super.initState();
+    // 1. Khởi tạo Video (Lấy link video mp4 từ Firebase Remote Config hoặc Storage)
+    // Lưu ý: link này phải là link trực tiếp dẫn tới file .mp4
+    _videoController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoMp4Url),
+    )..initialize().then((_) {
+      if (!mounted) return;
+      setState(() {});
+      _videoController!
+        ..setLooping(true)
+        ..play();
+    });
+
+    // 2. Đếm ngược
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft > 0) {
+        if (mounted) setState(() => _secondsLeft--);
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _videoController?.dispose(); // Hủy video khi đóng ad
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // 1. Hiển thị Video Full Màn Hình
+          GestureDetector(
+            onTap: () => openTikTok(widget.tiktokUrl),
+            child: SizedBox.expand(
+              child: _videoController != null && _videoController!.value.isInitialized
+                  ? FittedBox(
+                fit: BoxFit.cover, // Cắt video cho tràn màn hình giống TikTok
+                child: SizedBox(
+                  width: _videoController!.value.size.width,
+                  height: _videoController!.value.size.height,
+                  child: VideoPlayer(_videoController!),
+                ),
+              )
+                  : const Center(child: CircularProgressIndicator()), // Đang tải video
+            ),
+          ),
+
+          // Lớp phủ tối nhẹ để Text dễ đọc
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: Colors.black26),
+              ),
+            ),
+          ),
+
+          // 2. Nút đếm ngược / Đóng
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 20,
+            child: _secondsLeft > 0
+                ? _buildTimerBadge()
+                : _buildCloseButton(),
+          ),
+
+          // Gợi ý nhỏ ở dưới cùng
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: 16,
+              ),
+              child: Text("Bấm vào màn hình để xem trên TikTok",
+                  style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimerBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text("Đóng sau ${_secondsLeft}s", style: const TextStyle(color: Colors.white)),
+    );
+  }
+
+  Widget _buildCloseButton() {
+    return IconButton(
+      onPressed: () {
+        _videoController?.pause();
+        Navigator.pop(context);
+        widget.onClosed();
+      },
+      icon: const CircleAvatar(
+        backgroundColor: Colors.white24,
+        child: Icon(Icons.close, color: Colors.white),
+      ),
+    );
+  }
 }

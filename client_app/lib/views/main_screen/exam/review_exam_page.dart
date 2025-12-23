@@ -1,14 +1,16 @@
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// Import Controller và Model
 import 'package:client_app/controllers/exam.controller.dart';
 import 'package:client_app/widget/modal/show_modal.dart';
+import 'package:client_app/providers/remote_config_provider.dart';
 
 
-class ReviewExamPage extends StatefulWidget {
+class ReviewExamPage extends ConsumerStatefulWidget {
   final String courseId;
   final String examId;
   final Map<String, String?> userAnswers;
@@ -21,10 +23,10 @@ class ReviewExamPage extends StatefulWidget {
   });
 
   @override
-  State<ReviewExamPage> createState() => _ReviewExamPageState();
+  ConsumerState<ReviewExamPage> createState() => _ReviewExamPageState();
 }
 
-class _ReviewExamPageState extends State<ReviewExamPage> {
+class _ReviewExamPageState extends ConsumerState<ReviewExamPage> {
 
   final ExamController _examController = ExamController();
 
@@ -111,9 +113,12 @@ class _ReviewExamPageState extends State<ReviewExamPage> {
     // Đáp án người dùng đã chọn cho câu hiện tại (là Key Dài hoặc null)
     final String? selectedFullKey = widget.userAnswers[currentQuestionKey];
 
+    final String? youtubeUrl =
+    firestoreOptionsMap['youtubeUrl'] as String?;
+
     // Tìm Đáp án Đúng (Key Dài có value là true)
     final String correctFullKey = firestoreOptionsMap.keys.firstWhere(
-        (key) => firestoreOptionsMap[key] == true,
+        (key) => firestoreOptionsMap[key] == true && firestoreOptionsMap[key] is bool,
       orElse: () => '', // Trả về rỗng nếu không có đáp án đúng
     );
 
@@ -123,10 +128,13 @@ class _ReviewExamPageState extends State<ReviewExamPage> {
     // Danh sách các Key Dài của đáp án để hiển thị
     final List<String> optionFullKeys = firestoreOptionsMap.keys
       .cast<String>()
-      .where((key) => key != 'explanation')
+      .where((key) => key != 'explanation' && key != 'youtubeUrl')
       .toList()
       ..sort();
 
+    // Lấy link từ Remote Config (đã fetchAndActivate từ trước đó)
+    final String tiktokUrl = FirebaseRemoteConfig.instance.getString('tiktok_video_url');
+    final String youtubeUrlFromConfig = FirebaseRemoteConfig.instance.getString('youtube_url');
 
     return Scaffold(
       backgroundColor: const Color(0xffD9D9D9),
@@ -159,11 +167,34 @@ class _ReviewExamPageState extends State<ReviewExamPage> {
             const Spacer(),
             InkWell(
               onTap: () {
-                showExplanationModal(
+
+                final remoteConfig = ref.read(remoteConfigProvider);
+
+                if (!remoteConfig.showAd || remoteConfig.videoUrl.isEmpty) {
+                  showExplanationModal(
+                    context,
+                    questionExplanaion,
+                    youtubeUrl: youtubeUrl,
+                  );
+                  return;
+                }
+
+                showTikTokAd(
                   context,
-                  questionExplanaion
+                  remoteConfig.videoUrl,   // mp4
+                  remoteConfig.openUrl,    // link TikTok
+                      () {
+                    showExplanationModal(
+                      context,
+                      questionExplanaion,
+                      youtubeUrl: youtubeUrl,
+                    );
+                  },
                 );
-              }, child: Image.asset(AppIcons.imgCheck)),
+              },
+
+              child: Image.asset(AppIcons.imgCheck),
+            ),
           ],
         ),
         backgroundColor: AppColor.buttonprimaryCol,

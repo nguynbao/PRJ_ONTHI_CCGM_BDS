@@ -1,9 +1,10 @@
+import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../config/assets/app_icons.dart';
 import '../../../controllers/dictionary.controller.dart';
 import '../../../models/dictionary.model.dart';
 import 'package:client_app/widget/modal/show_modal.dart';
-
 
 class DictionaryPage extends StatefulWidget {
 
@@ -67,7 +68,16 @@ class _DictionaryPageState extends State<DictionaryPage> {
                   },
                   decoration: InputDecoration(
                     hintText: "Tìm thuật ngữ…",
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    prefixIcon: IconButton(
+                      onPressed: () {
+                        // TODO: Search nếu cần
+                      },
+                      icon: SvgPicture.asset(
+                        AppVector.iconSearch,
+                        width: 22,
+                        height: 22,
+                      ),
+                    ),
                     filled: true,
                     fillColor: Colors.grey.shade100,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

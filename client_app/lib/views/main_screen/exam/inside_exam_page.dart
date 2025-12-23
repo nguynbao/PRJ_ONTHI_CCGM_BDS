@@ -216,7 +216,7 @@ class _InsideExamPageState extends State<InsideExamPage> {
     // Danh sách các Label đáp án để hiển thị (A, B, C, D)
     final List<String> optionLabels = currentOptionsMap.keys
       .cast<String>()
-      .where((key) => key != 'explanation')
+      .where((key) => key != 'explanation' && key != 'youtubeUrl')
       .toList()
       ..sort();
 

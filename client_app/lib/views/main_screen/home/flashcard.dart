@@ -1,4 +1,5 @@
 import 'package:client_app/config/assets/app_icons.dart';
+import 'package:client_app/config/themes/app_color.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../controllers/flashcard.controller.dart'; // Giả định FlashcardService nằm ở đây
@@ -101,7 +102,7 @@ class _FlashcardPageState extends State<FlashcardPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddSet,
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: AppColor.primaryBlue,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:client_app/config/themes/app_theme.dart';
+import 'package:client_app/providers/remote_config_provider.dart';
 import 'package:client_app/views/intro/signup_page.dart';
 import 'package:client_app/views/main_screen/main_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +9,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'config/remote_config.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
+
+  // Khởi tạo Remote Config 1 lần duy nhất
+  final remoteService = RemoteConfigService();
+  await remoteService.init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -21,8 +28,17 @@ void main() async {
     ),
   );
 
-  runApp(ProviderScope(child: ClientApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        // Inject instance đã init vào Riverpod
+        remoteConfigProvider.overrideWithValue(remoteService),
+      ],
+      child: const ClientApp(),
+    ),
+  );
 }
+
 
 class ClientApp extends StatelessWidget {
   const ClientApp({super.key});

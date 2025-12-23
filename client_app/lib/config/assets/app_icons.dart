@@ -12,7 +12,4 @@ class AppIcons {
   static const String imgStart = '${base}start$format';
   static const String imgBack = '${base}back$format';
   static const String imgCheck = '${base}check$format';
-
-
-
 }

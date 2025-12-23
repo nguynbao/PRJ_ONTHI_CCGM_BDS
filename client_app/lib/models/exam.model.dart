@@ -31,7 +31,6 @@ class Exam {
       courseId: (data['courseId'] ?? '').toString(),
       questions: rawQuestions,
       durationMinutes: duration,
-
     );
   }
 

@@ -26,6 +26,11 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
       'title': 'English',
       'code': 'en',
     },
+    {
+      'icon': Icons.language,
+      'title': 'English',
+      'code': 'en',
+    },
     // Có thể thêm nhiều ngôn ngữ hơn nếu cần
   ];
 
