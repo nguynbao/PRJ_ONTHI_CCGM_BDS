@@ -26,9 +26,12 @@ class _YoutubeVideoSectionState extends State<YoutubeVideoSection> {
 
     debugPrint("===> DEBUG 1: URL = ${widget.videoUrl}");
     debugPrint("===> DEBUG 2: Video ID = $videoId");
-
+     if (videoId == null || videoId.isEmpty) {
+    debugPrint("Không lấy được Video ID");
+    return;
+  }
     _controller = YoutubePlayerController.fromVideoId(
-      videoId: videoId ?? '',
+       videoId: videoId,
       autoPlay: false,
       params: const YoutubePlayerParams(
         showControls: true,

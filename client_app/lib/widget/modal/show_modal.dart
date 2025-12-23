@@ -336,13 +336,14 @@ Widget _buildAnswerButton(
 }
 
 Future<void> showListAnswerBottomSheet(
-    BuildContext context,
-    int totalQuestions,
-    int answeredQuestions,
-    int questionIndex,
-    List<String?> selectedAnswers, // Danh sách đáp án đã chọn (Là Key Dài hoặc null)
-    Function(int index) onJumpToQuestion,
-    ) async {
+  BuildContext context,
+  int totalQuestions,
+  int answeredQuestions,
+  int questionIndex,
+  List<String?>
+  selectedAnswers, // Danh sách đáp án đã chọn (Là Key Dài hoặc null)
+  Function(int index) onJumpToQuestion,
+) async {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -372,7 +373,7 @@ Future<void> showListAnswerBottomSheet(
                       final questionNumber = index + 1;
 
                       final String? selectedOptionForQuestion =
-                      selectedAnswers.length > index
+                          selectedAnswers.length > index
                           ? selectedAnswers[index]
                           : null;
 
@@ -384,7 +385,9 @@ Future<void> showListAnswerBottomSheet(
                       final Color rowColor = isCurrent
                           ? Colors.blue.withOpacity(0.1) // Câu hiện tại
                           : isAnswered
-                          ? AppColor.primaryBlue.withOpacity(0.1) // MÀU CHO CÂU ĐÃ TRẢ LỜI
+                          ? AppColor.primaryBlue.withOpacity(
+                              0.1,
+                            ) // MÀU CHO CÂU ĐÃ TRẢ LỜI
                           : Colors.transparent;
 
                       void jumpToQuestion() {
@@ -415,25 +418,36 @@ Future<void> showListAnswerBottomSheet(
                               // 2. Các nút đáp án (Giờ chỉ để hiển thị trạng thái)
                               // Vấn đề: Chúng ta chỉ lưu KEY DÀI, nên không thể so sánh 'A' với 'A. Tính pháp lý'
                               // Ta sẽ chỉ so sánh Label ngắn ('A') với Label ngắn đã trích xuất từ Key Dài.
-
                               _buildAnswerButton(
                                 'A',
-                                selectedOptionForQuestion?.startsWith('A') == true ? 'A' : null,
+                                selectedOptionForQuestion?.startsWith('A') ==
+                                        true
+                                    ? 'A'
+                                    : null,
                                 null,
                               ),
                               _buildAnswerButton(
                                 'B',
-                                selectedOptionForQuestion?.startsWith('B') == true ? 'B' : null,
+                                selectedOptionForQuestion?.startsWith('B') ==
+                                        true
+                                    ? 'B'
+                                    : null,
                                 null,
                               ),
                               _buildAnswerButton(
                                 'C',
-                                selectedOptionForQuestion?.startsWith('C') == true ? 'C' : null,
+                                selectedOptionForQuestion?.startsWith('C') ==
+                                        true
+                                    ? 'C'
+                                    : null,
                                 null,
                               ),
                               _buildAnswerButton(
                                 'D',
-                                selectedOptionForQuestion?.startsWith('D') == true ? 'D' : null,
+                                selectedOptionForQuestion?.startsWith('D') ==
+                                        true
+                                    ? 'D'
+                                    : null,
                                 null,
                               ),
                             ],
@@ -453,9 +467,9 @@ Future<void> showListAnswerBottomSheet(
 }
 
 Future<void> showSuccessModalExam(
-    BuildContext context, {
-      VoidCallback? onConfirm,
-    }) async {
+  BuildContext context, {
+  VoidCallback? onConfirm,
+}) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -471,7 +485,8 @@ Future<void> showSuccessModalExam(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text( // Dùng const
+              const Text(
+                // Dùng const
                 "Nộp bài kiểm tra",
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -502,7 +517,7 @@ Future<void> showSuccessModalExam(
                   style: TextStyle(color: AppColor.buttonprimaryCol),
                 ),
               ),
-            ]
+            ],
           ),
         ),
       );
@@ -512,11 +527,16 @@ Future<void> showSuccessModalExam(
   print("Dialog đã đóng xong.");
 }
 
+Future<void> _openYoutubeApp(String url) async {
+  final uri = Uri.parse(url);
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
+}
+
 Future<void> showExplanationModal(
-    BuildContext context,
-    String explanation, {
-      String? youtubeUrl,
-    }) async {
+  BuildContext context,
+  String explanation, {
+  String? youtubeUrl,
+}) async {
   await showDialog(
     context: context,
     useRootNavigator: true,
@@ -547,12 +567,18 @@ Future<void> showExplanationModal(
                   ),
                   const SizedBox(height: 16),
                 ],
+                const SizedBox(height: 8),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => _openYoutubeApp(youtubeUrl!),
+                    icon: const Icon(Icons.open_in_new),
+                    label: const Text("Mở trên YouTube"),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 const Text(
                   "Nội dung giải thích:",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -573,13 +599,86 @@ Future<void> showExplanationModal(
             child: const Text("Đóng"),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       );
     },
   );
 }
+
+// Future<void> showExplanationModal(
+//   BuildContext context,
+//   String explanation, {
+//   String? youtubeUrl,
+// }) async {
+//   const String fixedYoutubeUrl = "https://www.youtube.com/watch?v=U0Vr1zotKIo";
+
+//   await showDialog(
+//     context: context,
+//     useRootNavigator: true,
+//     builder: (ctx) {
+//       return AlertDialog(
+//         title: const Text(
+//           "Giải thích đáp án",
+//           style: TextStyle(
+//             color: AppColor.buttonprimaryCol,
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         content: SizedBox(
+//           width: MediaQuery.of(ctx).size.width * 0.9,
+//           child: SingleChildScrollView(
+//             physics: const BouncingScrollPhysics(),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Container(
+//                   height: 200,
+//                   decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(12),
+//                     color: Colors.black,
+//                   ),
+//                   child: YoutubeVideoSection(
+//                     key: const ValueKey('youtube-player'),
+//                     videoUrl: youtubeUrl ?? fixedYoutubeUrl,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 8),
+//                 Center(
+//                   child: TextButton.icon(
+//                     onPressed: () => _openYoutubeApp(fixedYoutubeUrl),
+//                     icon: const Icon(Icons.open_in_new),
+//                     label: const Text("Mở trên YouTube"),
+//                   ),
+//                 ),
+//                 const SizedBox(height: 16),
+//                 const Text(
+//                   "Nội dung giải thích:",
+//                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+//                 ),
+//                 const SizedBox(height: 8),
+//                 Text(
+//                   explanation,
+//                   style: const TextStyle(
+//                     fontSize: 15,
+//                     height: 1.6,
+//                     color: Colors.black87,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(ctx),
+//             child: const Text("Đóng"),
+//           ),
+//         ],
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//       );
+//     },
+//   );
+// }
 
 // Popup xem chi tiết 1 thuật ngữ
 void showTermDetailModal(BuildContext context, DictionaryTerm term) {
@@ -597,20 +696,14 @@ void showTermDetailModal(BuildContext context, DictionaryTerm term) {
           children: [
             Text(
               term.term,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
 
             Text(
               term.definition,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.4,
-              ),
+              style: const TextStyle(fontSize: 16, height: 1.4),
             ),
 
             const SizedBox(height: 24),
@@ -633,10 +726,7 @@ Future<void> openTikTok(String url) async {
   try {
     final uri = Uri.parse(url);
 
-    await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   } catch (e) {
     debugPrint('Không mở được TikTok: $e');
   }
@@ -644,11 +734,11 @@ Future<void> openTikTok(String url) async {
 
 // --- Quảng cáo Full Màn Hình (Interstitials Style) ---
 void showTikTokAd(
-    BuildContext context,
-    String videoMp4Url,
-    String tiktokOpenUrl,
-    VoidCallback onClosed,
-    ) {
+  BuildContext context,
+  String videoMp4Url,
+  String tiktokOpenUrl,
+  VoidCallback onClosed,
+) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -664,7 +754,6 @@ void showTikTokAd(
   );
 }
 
-
 // Widget quản lý logic đếm ngược và UI Full Screen
 class _FullPageAdContent extends StatefulWidget {
   final String videoMp4Url;
@@ -674,7 +763,7 @@ class _FullPageAdContent extends StatefulWidget {
   const _FullPageAdContent({
     required this.videoMp4Url,
     required this.tiktokUrl,
-    required this.onClosed
+    required this.onClosed,
   });
 
   @override
@@ -686,21 +775,20 @@ class _FullPageAdContentState extends State<_FullPageAdContent> {
   Timer? _timer;
   VideoPlayerController? _videoController;
 
-
   @override
   void initState() {
     super.initState();
     // 1. Khởi tạo Video (Lấy link video mp4 từ Firebase Remote Config hoặc Storage)
     // Lưu ý: link này phải là link trực tiếp dẫn tới file .mp4
-    _videoController = VideoPlayerController.networkUrl(
-      Uri.parse(widget.videoMp4Url),
-    )..initialize().then((_) {
-      if (!mounted) return;
-      setState(() {});
-      _videoController!
-        ..setLooping(true)
-        ..play();
-    });
+    _videoController =
+        VideoPlayerController.networkUrl(Uri.parse(widget.videoMp4Url))
+          ..initialize().then((_) {
+            if (!mounted) return;
+            setState(() {});
+            _videoController!
+              ..setLooping(true)
+              ..play();
+          });
 
     // 2. Đếm ngược
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -729,16 +817,21 @@ class _FullPageAdContentState extends State<_FullPageAdContent> {
           GestureDetector(
             onTap: () => openTikTok(widget.tiktokUrl),
             child: SizedBox.expand(
-              child: _videoController != null && _videoController!.value.isInitialized
+              child:
+                  _videoController != null &&
+                      _videoController!.value.isInitialized
                   ? FittedBox(
-                fit: BoxFit.cover, // Cắt video cho tràn màn hình giống TikTok
-                child: SizedBox(
-                  width: _videoController!.value.size.width,
-                  height: _videoController!.value.size.height,
-                  child: VideoPlayer(_videoController!),
-                ),
-              )
-                  : const Center(child: CircularProgressIndicator()), // Đang tải video
+                      fit: BoxFit
+                          .cover, // Cắt video cho tràn màn hình giống TikTok
+                      child: SizedBox(
+                        width: _videoController!.value.size.width,
+                        height: _videoController!.value.size.height,
+                        child: VideoPlayer(_videoController!),
+                      ),
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(),
+                    ), // Đang tải video
             ),
           ),
 
@@ -755,22 +848,20 @@ class _FullPageAdContentState extends State<_FullPageAdContent> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 20,
-            child: _secondsLeft > 0
-                ? _buildTimerBadge()
-                : _buildCloseButton(),
+            child: _secondsLeft > 0 ? _buildTimerBadge() : _buildCloseButton(),
           ),
 
           // Gợi ý nhỏ ở dưới cùng
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(
-                bottom: 16,
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                "Bấm vào màn hình để xem trên TikTok",
+                style: TextStyle(color: Colors.white70, fontSize: 12.sp),
               ),
-              child: Text("Bấm vào màn hình để xem trên TikTok",
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -783,7 +874,10 @@ class _FullPageAdContentState extends State<_FullPageAdContent> {
         color: Colors.black54,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text("Đóng sau ${_secondsLeft}s", style: const TextStyle(color: Colors.white)),
+      child: Text(
+        "Đóng sau ${_secondsLeft}s",
+        style: const TextStyle(color: Colors.white),
+      ),
     );
   }
 
