@@ -20,7 +20,7 @@ class ExamController {
 
   // 🔥 Bộ sưu tập mới để lưu lịch sử làm bài
   CollectionReference<Map<String, dynamic>> get _historyCol =>
-      _db.collection('exam_history');
+      _db.collection('essay');
 
   CollectionReference<Map<String, dynamic>> _getExamsCol(String courseId) {
     return _coursesCol.doc(courseId).collection('exams');

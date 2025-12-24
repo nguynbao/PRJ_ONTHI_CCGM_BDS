@@ -1,4 +1,4 @@
-// lib/models/exam_history.model.dart
+// lib/models/essay.model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ExamHistory {

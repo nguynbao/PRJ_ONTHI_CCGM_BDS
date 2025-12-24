@@ -12,5 +12,5 @@ class AppVector {
   static const String iconQuestion = '${base}icon_question$format';
   static const String iconOclock = '${base}icon_oclock$format';
   static const String iconFlashCard = '${base}icon_flash_card$format';
-  static const String iconHistory = '${base}icon_history$format';
+  static const String iconEssay = '${base}icon_essay$format';
 }

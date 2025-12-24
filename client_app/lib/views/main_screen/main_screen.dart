@@ -1,6 +1,5 @@
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/views/main_screen/exam/exam_page.dart';
-import 'package:client_app/views/main_screen/exam_history/examhistorypage.dart';
 import 'package:client_app/views/main_screen/home/home_container.dart';
 import 'package:client_app/views/main_screen/my_courses/my_courses_page.dart';
 import 'package:client_app/views/main_screen/profile/profile_page.dart';
@@ -8,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_svg/svg.dart';
+
+import 'essay/essay_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -44,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
     // const HomeContainer(key: PageStorageKey('HomePage')),
     const MyCoursesPage(key: PageStorageKey('MyCoursesPage')),
     const ExamPage(key: PageStorageKey('ExamPage')),
-    ExamHistoryPage(key: PageStorageKey('FlashCardPage'), examId: '', examName: '',),
+    const EssayPage(key: PageStorageKey('EssayPage')),
     const ProfilePage(key: PageStorageKey('ProfilePage')),
   ];
 
@@ -53,7 +54,7 @@ class _MainScreenState extends State<MainScreen> {
     _TabInfo(title: 'Trang chủ', svgPath: AppVector.iconHome),
     _TabInfo(title: 'Bài học', svgPath: AppVector.iconCourses),
     _TabInfo(title: 'Kiểm tra', svgPath: AppVector.iconExam),
-    _TabInfo(title: 'Lịch sử', svgPath: AppVector.iconHistory),
+    _TabInfo(title: 'Tự luận', svgPath: AppVector.iconEssay),
     _TabInfo(title: 'Tài khoản', svgPath: AppVector.iconProfile),
   ];
 
