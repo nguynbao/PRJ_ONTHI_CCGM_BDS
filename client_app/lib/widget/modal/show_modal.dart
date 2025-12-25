@@ -570,7 +570,7 @@ Future<void> showExplanationModal(
                 const SizedBox(height: 8),
                 Center(
                   child: TextButton.icon(
-                    onPressed: () => _openYoutubeApp(youtubeUrl!),
+                    onPressed: () => _openYoutubeApp("https://www.youtube.com/@tienkingbds"),
                     icon: const Icon(Icons.open_in_new),
                     label: const Text("Mở trên YouTube"),
                   ),
