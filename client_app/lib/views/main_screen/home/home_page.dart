@@ -367,7 +367,7 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black,
                             fontSize: 16.sp, // ✅ Sử dụng .sp
                           ),
-                          maxLines: 2, // ✅ Cho phép 2 dòng để linh hoạt hơn
+                          maxLines: 2, 
                           overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                         ),
                       ),
