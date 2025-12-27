@@ -232,7 +232,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                 ),
               ),
 
-              const Spacer(),
+              SizedBox(height: 20.h),
 
               // --- Logout ---
               GestureDetector(
@@ -242,6 +242,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                 },
                 child: Container(
                   width: double.infinity,
+                  height: 50.h,
                   padding: EdgeInsets.symmetric(
                     vertical: 14.h,
                     horizontal: 16.w,
@@ -272,7 +273,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   ),
                 ),
               ),
-              SizedBox(height: 20.h),
+             
             ],
           ),
         ),

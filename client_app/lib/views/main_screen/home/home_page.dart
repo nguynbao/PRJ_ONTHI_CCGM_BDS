@@ -3,11 +3,9 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/course.controller.dart';
 import 'package:client_app/controllers/user.controller.dart';
 import 'package:client_app/models/course.model.dart';
-import 'package:client_app/providers/app_provider.dart';
 import 'package:client_app/views/main_screen/home/topic_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:client_app/models/topic.model.dart'; // ✅ Đã có import Topic model
@@ -320,6 +318,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+
             Flexible(
               flex: 1,
               child: Container(
@@ -331,22 +330,20 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Flexible( // ✅ Thêm Flexible để tránh overflow trong Row
-                            child: Text(
-                              courseName,
-                              style: TextStyle(
-                                color: AppColor.buttomThirdCol,
-                                fontSize: 14.sp, // ✅ Sử dụng .sp và giảm nhẹ nếu cần
-                              ),
-                              maxLines: 1, // ✅ Giới hạn dòng
-                              overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
+                          Text(
+                            courseName,
+                            style: TextStyle(
+                              color: AppColor.buttomThirdCol,
+                              fontSize: 14.sp, // ✅ Sử dụng .sp và giảm nhẹ nếu cần
                             ),
+                            maxLines: 1, // ✅ Giới hạn dòng
+                            overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                           ),
                           const Spacer(),
                           IconButton(
