@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class YoutubeVideoSection extends StatefulWidget {
   final String videoUrl;
@@ -10,65 +10,56 @@ class YoutubeVideoSection extends StatefulWidget {
 }
 
 class _YoutubeVideoSectionState extends State<YoutubeVideoSection> {
-  YoutubePlayerController? _controller;
-  bool _isReadyToDisplay = false; // Biến kiểm soát hiển thị
+  late YoutubePlayerController _controller;
+  bool _isValidVideo = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initPlayer();
-    });
-  }
 
-  void _initPlayer() {
-    final videoId = YoutubePlayerController.convertUrlToId(widget.videoUrl.trim());
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
 
-    debugPrint("===> DEBUG 1: URL = ${widget.videoUrl}");
-    debugPrint("===> DEBUG 2: Video ID = $videoId");
+    if (videoId == null || videoId.isEmpty) {
+      _isValidVideo = false;
+      return;
+    }
 
-    _controller = YoutubePlayerController.fromVideoId(
-      videoId: videoId ?? '',
-      autoPlay: false,
-      params: const YoutubePlayerParams(
-        showControls: true,
-        showFullscreenButton: true,
-        enableJavaScript: true,
-        playsInline: true,
-        strictRelatedVideos: true,
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+        controlsVisibleAtStart: true,
+        enableCaption: true,
       ),
     );
-
-    // Chờ 400ms để Dialog mở xong hoàn toàn mới bắt đầu render WebView
-    // Việc này giúp tránh lỗi "Did not find frame" do tranh chấp tài nguyên
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          setState(() => _isReadyToDisplay = true);
-        }
-      });
-    });
   }
 
   @override
   void dispose() {
-    // Giải phóng bộ đệm ImageReader ngay lập tức khi đóng Dialog
-    _controller?.close();
+    if (_isValidVideo) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null || !_isReadyToDisplay) {
+    if (!_isValidVideo) {
       return const SizedBox(
         height: 200,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: Text("Không phát được video"),
+        ),
       );
     }
 
     return AspectRatio(
       aspectRatio: 16 / 9,
-      child: YoutubePlayer(controller: _controller!),
+      child: YoutubePlayer(
+        controller: _controller,
+        showVideoProgressIndicator: true,
+      ),
     );
   }
 }
