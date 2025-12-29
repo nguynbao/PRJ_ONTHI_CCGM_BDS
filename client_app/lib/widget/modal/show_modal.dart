@@ -1,9 +1,18 @@
+import 'dart:async';
+
 import 'package:client_app/config/assets/app_icons.dart';
 import 'package:client_app/config/assets/app_vectors.dart';
 import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/views/main_screen/exam/total_exam_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
+import '../../models/dictionary.model.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+
+import '../youtube_video_section.dart';
 
 Future<void> showSuccessDialog(
   BuildContext context, {
@@ -64,7 +73,6 @@ Future<void> showSuccessDialog(
     },
   );
 
-  // Tự đóng sau thời gian chỉ định (nếu có)
   if (autoCloseAfter != null) {
     Future.delayed(autoCloseAfter, () {
       // Tránh lỗi nếu đã đóng
@@ -117,7 +125,6 @@ Future<void> showRemoveBottomSheet(
               ),
             ),
 
-            // icon minh họa (SVG tuỳ dự án)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
@@ -292,7 +299,7 @@ Future<void> showBackModalExam(BuildContext context) async {
 Widget _buildAnswerButton(
   String option, // 'A', 'B', 'C', 'D'
   String? selectedAnswer, // Đáp án đã chọn cho câu hỏi này
-  VoidCallback onTap,
+  VoidCallback? onTap,
 ) {
   // Xác định xem đáp án này có phải là đáp án đã chọn không
   final bool isSelected = selectedAnswer == option;
@@ -307,7 +314,7 @@ Widget _buildAnswerButton(
     child: Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: backgroundColor, // ✨ ÁP DỤNG MÀU NỀN THEO TRẠNG THÁI
+        color: backgroundColor,
         border: Border.all(
           color: Colors.grey.shade400,
           width: 1,
@@ -320,7 +327,7 @@ Widget _buildAnswerButton(
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: textColor, // ✨ ÁP DỤNG MÀU CHỮ THEO TRẠNG THÁI
+            color: textColor,
           ),
         ),
       ),
@@ -329,12 +336,13 @@ Widget _buildAnswerButton(
 }
 
 Future<void> showListAnswerBottomSheet(
-  BuildContext context,
-  int totalQuestions,
-  int answeredQuestions,
-  int questionIndex,
-  List<String?> selectedAnswers, // Danh sách đáp án đã chọn
-) async {
+    BuildContext context,
+    int totalQuestions,
+    int answeredQuestions,
+    int questionIndex,
+    List<String?> selectedAnswers, // Danh sách đáp án đã chọn (Là Key Dài hoặc null)
+    Function(int index) onJumpToQuestion,
+    ) async {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -363,30 +371,38 @@ Future<void> showListAnswerBottomSheet(
                     children: List.generate(totalQuestions, (index) {
                       final questionNumber = index + 1;
 
-                      // Lấy đáp án đã chọn cho câu hỏi hiện tại (index)
                       final String? selectedOptionForQuestion =
-                          selectedAnswers.length > index
+                      selectedAnswers.length > index
                           ? selectedAnswers[index]
                           : null;
 
-                      // Tô sáng dòng câu hỏi hiện tại
+                      // LƯU Ý: selectedOptionForQuestion LÀ KEY DÀI ("A. Tính pháp lý") HOẶC NULL
+
                       final bool isCurrent = index == questionIndex;
+                      final bool isAnswered = selectedOptionForQuestion != null;
+
                       final Color rowColor = isCurrent
-                          ? Colors.blue.withOpacity(0.1)
+                          ? Colors.blue.withOpacity(0.1) // Câu hiện tại
+                          : isAnswered
+                          ? AppColor.primaryBlue.withOpacity(0.1) // MÀU CHO CÂU ĐÃ TRẢ LỜI
                           : Colors.transparent;
 
-                      return Container(
-                        color: rowColor,
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // 1. Text Câu hỏi
-                            SizedBox(
-                              width:
-                                  80, // Giới hạn chiều rộng để căn chỉnh tốt hơn
-                              child: InkWell(
-                                onTap: () => print('Câu số $questionNumber'),
+                      void jumpToQuestion() {
+                        Navigator.pop(context);
+                        onJumpToQuestion(index);
+                      }
+
+                      return InkWell(
+                        onTap: jumpToQuestion,
+                        child: Container(
+                          color: rowColor,
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              // 1. Text Câu hỏi
+                              SizedBox(
+                                width: 80,
                                 child: Text(
                                   "Câu hỏi $questionNumber",
                                   style: const TextStyle(
@@ -395,39 +411,33 @@ Future<void> showListAnswerBottomSheet(
                                   ),
                                 ),
                               ),
-                            ),
 
-                            // 2. Các nút đáp án (Sử dụng hàm trợ giúp)
-                            _buildAnswerButton(
-                              'A',
-                              selectedOptionForQuestion,
-                              () {
-                                // Thêm logic chuyển đến câu hỏi này
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'B',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'C',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            _buildAnswerButton(
-                              'D',
-                              selectedOptionForQuestion,
-                              () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
+                              // 2. Các nút đáp án (Giờ chỉ để hiển thị trạng thái)
+                              // Vấn đề: Chúng ta chỉ lưu KEY DÀI, nên không thể so sánh 'A' với 'A. Tính pháp lý'
+                              // Ta sẽ chỉ so sánh Label ngắn ('A') với Label ngắn đã trích xuất từ Key Dài.
+
+                              _buildAnswerButton(
+                                'A',
+                                selectedOptionForQuestion?.startsWith('A') == true ? 'A' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'B',
+                                selectedOptionForQuestion?.startsWith('B') == true ? 'B' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'C',
+                                selectedOptionForQuestion?.startsWith('C') == true ? 'C' : null,
+                                null,
+                              ),
+                              _buildAnswerButton(
+                                'D',
+                                selectedOptionForQuestion?.startsWith('D') == true ? 'D' : null,
+                                null,
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }),
@@ -442,7 +452,10 @@ Future<void> showListAnswerBottomSheet(
   );
 }
 
-Future<void> showSuccessModalExam(BuildContext context) async {
+Future<void> showSuccessModalExam(
+    BuildContext context, {
+      VoidCallback? onConfirm,
+    }) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -452,13 +465,13 @@ Future<void> showSuccessModalExam(BuildContext context) async {
         insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
         backgroundColor: Colors.white,
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text( // Dùng const
                 "Nộp bài kiểm tra",
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -467,29 +480,29 @@ Future<void> showSuccessModalExam(BuildContext context) async {
                   fontSize: 20,
                 ),
               ),
-              SizedBox(height: 15),
-              Text(
+              const SizedBox(height: 15),
+              const Text(
                 'BẠN CÓ CHẮC CHẮN MUỐN \n NỘP BÀI KIỂM TRA KHÔNG',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black38),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => TotalExamPage()),
-                ),
-                child: Text("Nộp bài kiểm tra"),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onConfirm?.call();
+                },
+                child: const Text("Nộp bài kiểm tra"),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               TextButton(
                 onPressed: () => {Navigator.pop(context)},
-                child: Text(
+                child: const Text(
                   "Quay lại",
                   style: TextStyle(color: AppColor.buttonprimaryCol),
                 ),
               ),
-            ],
+            ]
           ),
         ),
       );
@@ -497,4 +510,294 @@ Future<void> showSuccessModalExam(BuildContext context) async {
   );
 
   print("Dialog đã đóng xong.");
+}
+
+Future<void> showExplanationModal(
+    BuildContext context,
+    String explanation, {
+      String? youtubeUrl,
+    }) async {
+  await showDialog(
+    context: context,
+    useRootNavigator: true,
+    builder: (ctx) {
+      return AlertDialog(
+        title: const Text(
+          "Giải thích đáp án",
+          style: TextStyle(
+            color: AppColor.buttonprimaryCol,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SizedBox(
+          width: MediaQuery.of(ctx).size.width * 0.9,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(), // Cuộn mượt kiểu iOS
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (youtubeUrl != null && youtubeUrl.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: YoutubeVideoSection(
+                      key: const ValueKey('youtube-player'),
+                      videoUrl: youtubeUrl,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                const Text(
+                  "Nội dung giải thích:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  explanation,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.6,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Đóng"),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      );
+    },
+  );
+}
+
+// Popup xem chi tiết 1 thuật ngữ
+void showTermDetailModal(BuildContext context, DictionaryTerm term) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              term.term,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              term.definition,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Đóng"),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Future<void> openTikTok(String url) async {
+  try {
+    final uri = Uri.parse(url);
+
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  } catch (e) {
+    debugPrint('Không mở được TikTok: $e');
+  }
+}
+
+// --- Quảng cáo Full Màn Hình (Interstitials Style) ---
+void showTikTokAd(
+    BuildContext context,
+    String videoMp4Url,
+    String tiktokOpenUrl,
+    VoidCallback onClosed,
+    ) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (_, __, ___) {
+      return _FullPageAdContent(
+        videoMp4Url: videoMp4Url,
+        tiktokUrl: tiktokOpenUrl,
+        onClosed: onClosed,
+      );
+    },
+  );
+}
+
+
+// Widget quản lý logic đếm ngược và UI Full Screen
+class _FullPageAdContent extends StatefulWidget {
+  final String videoMp4Url;
+  final String tiktokUrl;
+  final VoidCallback onClosed;
+
+  const _FullPageAdContent({
+    required this.videoMp4Url,
+    required this.tiktokUrl,
+    required this.onClosed
+  });
+
+  @override
+  State<_FullPageAdContent> createState() => _FullPageAdContentState();
+}
+
+class _FullPageAdContentState extends State<_FullPageAdContent> {
+  int _secondsLeft = 5;
+  Timer? _timer;
+  VideoPlayerController? _videoController;
+
+
+  @override
+  void initState() {
+    super.initState();
+    // 1. Khởi tạo Video (Lấy link video mp4 từ Firebase Remote Config hoặc Storage)
+    // Lưu ý: link này phải là link trực tiếp dẫn tới file .mp4
+    _videoController = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoMp4Url),
+    )..initialize().then((_) {
+      if (!mounted) return;
+      setState(() {});
+      _videoController!
+        ..setLooping(true)
+        ..play();
+    });
+
+    // 2. Đếm ngược
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft > 0) {
+        if (mounted) setState(() => _secondsLeft--);
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _videoController?.dispose(); // Hủy video khi đóng ad
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // 1. Hiển thị Video Full Màn Hình
+          GestureDetector(
+            onTap: () => openTikTok(widget.tiktokUrl),
+            child: SizedBox.expand(
+              child: _videoController != null && _videoController!.value.isInitialized
+                  ? FittedBox(
+                fit: BoxFit.cover, // Cắt video cho tràn màn hình giống TikTok
+                child: SizedBox(
+                  width: _videoController!.value.size.width,
+                  height: _videoController!.value.size.height,
+                  child: VideoPlayer(_videoController!),
+                ),
+              )
+                  : const Center(child: CircularProgressIndicator()), // Đang tải video
+            ),
+          ),
+
+          // Lớp phủ tối nhẹ để Text dễ đọc
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: Colors.black26),
+              ),
+            ),
+          ),
+
+          // 2. Nút đếm ngược / Đóng
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 20,
+            child: _secondsLeft > 0
+                ? _buildTimerBadge()
+                : _buildCloseButton(),
+          ),
+
+          // Gợi ý nhỏ ở dưới cùng
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: 16,
+              ),
+              child: Text("Bấm vào màn hình để xem trên TikTok",
+                  style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimerBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text("Đóng sau ${_secondsLeft}s", style: const TextStyle(color: Colors.white)),
+    );
+  }
+
+  Widget _buildCloseButton() {
+    return IconButton(
+      onPressed: () {
+        _videoController?.pause();
+        Navigator.pop(context);
+        widget.onClosed();
+      },
+      icon: const CircleAvatar(
+        backgroundColor: Colors.white24,
+        child: Icon(Icons.close, color: Colors.white),
+      ),
+    );
+  }
 }

@@ -20,6 +20,7 @@ class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
+  final TextEditingController _confirmPwdController = TextEditingController();
 
   final _auth = AuthController();
   bool _agree = false;
@@ -29,6 +30,7 @@ class _SignupPageState extends State<SignupPage> {
   void dispose() {
     _emailController.dispose();
     _pwdController.dispose();
+    _confirmPwdController.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,12 @@ class _SignupPageState extends State<SignupPage> {
   String? _validatePwd(String? v) {
     if (v == null || v.isEmpty) return 'Password is required';
     if (v.length < 6) return 'At least 6 characters';
+    return null;
+  }
+
+  String? _validateConfirmPwd(String? v) {
+    if (v == null || v.isEmpty) return 'Please confirm your password';
+    if (v != _pwdController.text) return 'Passwords do not match';
     return null;
   }
 
@@ -93,6 +101,8 @@ class _SignupPageState extends State<SignupPage> {
                   _textFieldEmail(context),
                   const SizedBox(height: 12),
                   _textFieldPwd(context),
+                  const SizedBox(height: 12),
+                  _textFieldConfirmPwd(context),
                   const SizedBox(height: 12),
                   _checkBoxConfirm(),
                   const SizedBox(height: 16),
@@ -280,6 +290,33 @@ class _SignupPageState extends State<SignupPage> {
           focusedBorder: _border(AppColor.buttonprimaryCol),
         ),
         validator: _validateEmail,
+      ),
+    );
+  }
+
+  Widget _textFieldConfirmPwd(BuildContext context) {
+    return _inputWrapper(
+      child: TextFormField(
+        controller: _confirmPwdController,
+        obscureText: _obscure,
+        cursorColor: AppColor.textpriCol,
+        decoration: InputDecoration(
+          hintText: 'Confirm Password',
+          hintStyle: const TextStyle(color: AppColor.textpriCol),
+          prefixIcon: const Icon(Iconsax.lock, color: AppColor.textpriCol),
+          suffixIcon: IconButton(
+            onPressed: () => setState(() => _obscure = !_obscure),
+            icon: Icon(
+              _obscure ? Iconsax.eye_slash : Iconsax.eye,
+              color: AppColor.textpriCol,
+              size: 20,
+            ),
+          ),
+          border: _border(Colors.transparent),
+          enabledBorder: _border(Colors.transparent),
+          focusedBorder: _border(AppColor.buttonprimaryCol),
+        ),
+        validator: _validateConfirmPwd,
       ),
     );
   }

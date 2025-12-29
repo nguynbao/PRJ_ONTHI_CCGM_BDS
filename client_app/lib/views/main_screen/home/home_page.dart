@@ -3,8 +3,11 @@ import 'package:client_app/config/themes/app_color.dart';
 import 'package:client_app/controllers/course.controller.dart';
 import 'package:client_app/controllers/user.controller.dart';
 import 'package:client_app/models/course.model.dart';
+import 'package:client_app/providers/app_provider.dart';
+import 'package:client_app/views/main_screen/home/topic_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:client_app/models/topic.model.dart'; // ✅ Đã có import Topic model
@@ -20,7 +23,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Biến trạng thái
-  int _selectedTopicIndex = 0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
+  int _selectedTopicIndex =
+  0; // Index của Chủ đề/Bài học được chọn trong danh sách lọc
   String _displayName = ''; // Tên người dùng hiển thị
   bool _loading = true; // Cờ trạng thái tải dữ liệu
 
@@ -87,7 +91,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
   Widget _buildAppBarContent(BuildContext context, bool isDrawerOpen) {
     final title = _loading
         ? 'Chào, ...'
@@ -104,20 +107,28 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         SizedBox(width: 20.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(color: Colors.black)),
-            SizedBox(height: 10.h),
-            Text(
-              'Hôm nay bạn muốn học gì?',
-              style: TextStyle(fontSize: 13.sp, color: Colors.black45),
-            ),
-          ],
+        Expanded( // ✅ Thêm Expanded để tránh overflow ngang
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(color: Colors.black),
+                maxLines: 1, // ✅ Giới hạn dòng
+                overflow: TextOverflow.ellipsis, // ✅ Thêm ellipsis nếu quá dài
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Hôm nay bạn muốn học gì?',
+                style: TextStyle(fontSize: 13.sp, color: Colors.black45),
+                maxLines: 1, // ✅ Giới hạn dòng
+                overflow: TextOverflow.ellipsis, // ✅ Thêm ellipsis nếu quá dài
+              ),
+            ],
+          ),
         ),
       ],
     );
-
   }
 
   Widget _buildCategorySelector() {
@@ -149,16 +160,14 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {},
               child: Text(
                 'Xem tất cả',
-                style: TextStyle(
-                  color: AppColor.buttonprimaryCol,
-                ),
+                style: TextStyle(color: AppColor.buttonprimaryCol),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 28,
+          height: 40.h, // ✅ Tăng height từ 28 lên 40 để phù hợp với minimumSize và tránh overflow
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _danhSachKhoaHoc.length,
@@ -177,15 +186,20 @@ class _HomePageState extends State<HomePage> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: const Size(0, 40),
-                  foregroundColor: selected ? AppColor.buttomSecondCol : Colors.grey,
+                  foregroundColor: selected
+                      ? AppColor.buttomSecondCol
+                      : Colors.grey,
                 ),
                 child: Center(
-                  child: Text(
-                    course.name,
-                    style: TextStyle(
-                      color: selected ? AppColor.buttomSecondCol : Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                  child: Flexible( // ✅ Thêm Flexible để text có thể wrap hoặc ellipsis
+                    child: Text(
+                      course.name,
+                      style: TextStyle(
+                        color: selected ? AppColor.buttomSecondCol : Colors.grey,
+                        fontSize: 15.sp, // ✅ Sử dụng .sp để scale theo screen
+                      ),
+                      maxLines: 1, // ✅ Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                     ),
                   ),
                 ),
@@ -212,7 +226,10 @@ class _HomePageState extends State<HomePage> {
     if (tenChuDeDuyNhat.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 10),
-        child: Text('Khóa học này chưa có chủ đề.', style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'Khóa học này chưa có chủ đề.',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -233,16 +250,14 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {},
               child: Text(
                 'Xem tất cả',
-                style: TextStyle(
-                  color: AppColor.buttonprimaryCol,
-                ),
+                style: TextStyle(color: AppColor.buttonprimaryCol),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 28,
+          height: 40.h, // ✅ Tăng height từ 28 lên 40 để phù hợp với minimumSize và tránh overflow
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: tenChuDeDuyNhat.length, // ✅ Dùng danh sách tên DUY NHẤT
@@ -256,15 +271,20 @@ class _HomePageState extends State<HomePage> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: const Size(0, 40),
-                  foregroundColor: selected ? AppColor.buttomSecondCol : Colors.grey,
+                  foregroundColor: selected
+                      ? AppColor.buttomSecondCol
+                      : Colors.grey,
                 ),
                 child: Center(
-                  child: Text(
-                    topicName, // Hiển thị tên Topic
-                    style: TextStyle(
-                      color: selected ? AppColor.buttomSecondCol : Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                  child: Flexible( // ✅ Thêm Flexible để text có thể wrap hoặc ellipsis
+                    child: Text(
+                      topicName, // Hiển thị tên Topic
+                      style: TextStyle(
+                        color: selected ? AppColor.buttomSecondCol : Colors.grey,
+                        fontSize: 15.sp, // ✅ Sử dụng .sp để scale theo screen
+                      ),
+                      maxLines: 1, // ✅ Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                     ),
                   ),
                 ),
@@ -276,75 +296,91 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-  Widget _buildCourseCard({required String courseName, required String topicName}) {
+  Widget _buildCourseCard({
+    required String courseName,
+    required String topicName,
+    required void Function() onTap,
+  }) {
     return SizedBox(
       height: 250.h,
       width: 250.w,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ... (Phần hình ảnh)
-          Flexible(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(20),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ... (Phần hình ảnh)
+            Flexible(
+              flex: 2,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
               ),
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(20),
+            Flexible(
+              flex: 1,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(20),
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          courseName,
-                          style: TextStyle(
-                            color: AppColor.buttomThirdCol,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () => {},
-                          icon: SvgPicture.asset(
-                            AppVector.iconTag,
-                            height: 15,
-                            width: 15,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.black,
-                              BlendMode.srcIn,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible( // ✅ Thêm Flexible để tránh overflow trong Row
+                            child: Text(
+                              courseName,
+                              style: TextStyle(
+                                color: AppColor.buttomThirdCol,
+                                fontSize: 14.sp, // ✅ Sử dụng .sp và giảm nhẹ nếu cần
+                              ),
+                              maxLines: 1, // ✅ Giới hạn dòng
+                              overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                             ),
                           ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => {},
+                            icon: SvgPicture.asset(
+                              AppVector.iconTag,
+                              height: 15,
+                              width: 15,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.black,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Flexible( // ✅ Thêm Flexible để text có thể thu nhỏ nếu cần
+                        child: Text(
+                          topicName,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.sp, // ✅ Sử dụng .sp
+                          ),
+                          maxLines: 2, // ✅ Cho phép 2 dòng để linh hoạt hơn
+                          overflow: TextOverflow.ellipsis, // ✅ Ellipsis nếu quá dài
                         ),
-                      ],
-                    ),
-                    Text(
-                      topicName,
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -379,21 +415,29 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Khóa học ưu đãi hôm nay!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w300,
+              Flexible( // ✅ Thêm Flexible cho text dài
+                child: Text(
+                  'Khóa học ưu đãi hôm nay!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w300,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(height: 8.h),
-              Text(
-                'Flutter Developer Pro\nGiảm 50%',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
+              Flexible( // ✅ Thêm Flexible cho text dài
+                child: Text(
+                  'Flutter Developer Pro\nGiảm 50%',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const Spacer(),
@@ -420,8 +464,6 @@ class _HomePageState extends State<HomePage> {
     ),
   );
 
-
-
   @override
   Widget build(BuildContext context) {
     final scaffold = Scaffold.maybeOf(context);
@@ -439,7 +481,9 @@ class _HomePageState extends State<HomePage> {
         .toList();
 
     // 3. Xác định Tên Chủ đề đang được chọn (dựa trên index của danh sách TÊN DUY NHẤT)
-    final String tenChuDeDuocChon = tenChuDeDuyNhat.isNotEmpty && _selectedTopicIndex < tenChuDeDuyNhat.length
+    final String tenChuDeDuocChon =
+    tenChuDeDuyNhat.isNotEmpty &&
+        _selectedTopicIndex < tenChuDeDuyNhat.length
         ? tenChuDeDuyNhat[_selectedTopicIndex]
         : '';
 
@@ -484,33 +528,43 @@ class _HomePageState extends State<HomePage> {
 
                   // HIỂN THỊ DANH SÁCH THẺ ĐÃ LỌC
                   if (chuDeDaLoc.isEmpty && !_loading)
-                    const Text('Không có nội dung cho chủ đề đã chọn.', style: TextStyle(color: Colors.grey)),
+                    const Text(
+                      'Không có nội dung cho chủ đề đã chọn.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
 
                   if (chuDeDaLoc.isNotEmpty)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Nội dung Chủ đề "${tenChuDeDuocChon}"',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
                         SizedBox(
                           height: 250.h,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
-                            itemCount: chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
-                            separatorBuilder: (context, index) => SizedBox(width: 20.w),
+                            itemCount:
+                            chuDeDaLoc.length, // ✅ Dùng danh sách ĐÃ LỌC
+                            separatorBuilder: (context, index) =>
+                                SizedBox(width: 20.w),
                             itemBuilder: (context, index) {
                               final topicDaLoc = chuDeDaLoc[index];
 
                               return _buildCourseCard(
                                 courseName: currentCourseName,
-                                topicName: topicDaLoc.name, // Lấy tên từ Topic đã lọc
+                                topicName:
+                                topicDaLoc.name, // Lấy tên từ Topic đã lọc
+                                onTap: () {
+                                  // ✅ SỬA LỖI: Sử dụng _selectedCourseIndex thay vì index
+                                  final course = _danhSachKhoaHoc[_selectedCourseIndex];
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => TopicDetailPage(
+                                        courseId: course.id,
+                                        topicId: topicDaLoc.id,
+                                        topicName: topicDaLoc.name,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),

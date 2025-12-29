@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 enum DrawerItem {
   home,
   flashcard,
-  // dictionary,
+  dictionary,
   logout,
 }
 
@@ -155,17 +155,18 @@ class _HomeDrawerState extends State<HomeDrawer> {
                 },
               ),
 
-              // _buildDrawerItem(
-              //   context,
-              //   icon: Icons.menu_book_rounded,
-              //   title: "Từ điển BĐS",
-              //   subtitle: "Thuật ngữ quan trọng",
-              //   gradient: [Colors.greenAccent, Colors.teal],
-              //   onTap: () {
-              //     onItemSelected(DrawerItem.dictionary);
-              //     // onClose();
-              //   },
-              // ),
+              _buildDrawerItem(
+                context,
+                icon: Icons.menu_book_rounded,
+                title: "Từ điển BĐS",
+                subtitle: "Thuật ngữ quan trọng",
+                gradient: [Colors.greenAccent, Colors.teal],
+                onTap: () {
+                  widget.onItemSelected(DrawerItem.dictionary);
+                  // onClose();
+                },
+              ),
+
               SizedBox(height: 30.h),
               Divider(color: Colors.black12),
 
